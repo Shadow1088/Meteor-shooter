@@ -40,9 +40,6 @@ elif sets.window_size == "Full":
 
 ###########################################################################
 ###########################################################################
-ship_an = True
-i = 1
-
 
 
 screen = pygame.display.set_mode((screen_width, screen_height))
@@ -55,11 +52,9 @@ font_size = 50
 font = pygame.font.Font("graphics/subatomic.ttf", font_size)
 text0 = font.render("Meteor shooter", True, "grey50")
 
+i = 1
+BREAK = False
 # sizes
-
-
-
-
 
 
 
@@ -77,16 +72,23 @@ while True:
     # location of surfaces
     screen.blit(background, (0, 0))
     
-    while ship_an == True:
-        if i > screen_width:
-            i = -1
-        elif i == 0:
-            i = 1 
-        i = i*10
-        screen.blit(ship, (i, math.floor(screen_height/3*2)))
     
+    screen.blit(ship, (i, math.floor(screen_height/4*3.1)))
+    
+    if i >= screen.get_width() - ship.get_width():
+        BREAK = True
+        
+    if BREAK == True:
+        i = i - 0.27*x
+    else: i = i + 0.27*x
     screen.blit(text0, (screen_width/2 - text0.get_width()/2, screen_height/2-(30*y) - text0.get_height()/2))
+    
+    if i <= 0:
+        BREAK = False
+        
 
+               
+#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#
+        
 
-    ##
     pygame.display.update()
