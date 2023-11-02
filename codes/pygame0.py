@@ -63,7 +63,7 @@ text0 = font.render("Meteor shooter", True, "grey50")
 #OTHER
 i = 1
 BREAK = False
-
+clock = pygame.time.Clock()
 #sizes
 ###########################################################################
 ###########################################################################
@@ -76,10 +76,12 @@ while True:
             pygame.quit()
             sys.exit()
     
-    #### updates 
-    
+    #### 
     screen.fill("grey13")
-    
+    clock.tick(60)
+    #### 
+    # updates
+
     # surfaces(blit and location)
     screen.blit(background, (0, 0))
     
@@ -92,8 +94,8 @@ while True:
         BREAK = False
         
     if BREAK == True:
-        i = i - 0.27*x
-    else: i = i + 0.27*x
+        i = i - 4*x
+    else: i = i + 4*x
 
     #MAIN SCREEN TEXT
     screen.blit(text0, (screen_width/2 - text0.get_width()/2, screen_height/2-(30*y) - text0.get_height()/2))
