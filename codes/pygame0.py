@@ -12,7 +12,7 @@ class Settings:
     resolution = "Normal"
 
     window_sizes = ["Small", "Normal", "Big", "Full"]
-    window_size = "Normal"
+    window_size = "Big"
 sets = Settings()
 
 ###xxx###
@@ -54,16 +54,24 @@ pygame.display.set_caption("Meteor shooter - ZZ")
 #IMAGES
 ship = pygame.image.load("graphics/ship.png").convert_alpha()
 background = pygame.image.load("graphics/background.png").convert()
+START_butt = pygame.image.load("graphics/START.png").convert_alpha()
+EXIT_butt = pygame.image.load("graphics/EXIT.png").convert_alpha()
+
 
 #TEXT
 font_size = 50
 font = pygame.font.Font("graphics/subatomic.ttf", font_size)
 text0 = font.render("Meteor shooter", True, "grey50")
 
+#OBJECT SETTINGS
+ship_rect = ship.get_rect(center = (screen_width/2, screen_height/2))
+start_rect = START_butt.get_rect(center = (screen_width/2 - 200*x, screen_height/2 + 30*y))
+exit_rect = EXIT_butt.get_rect(center = (screen_width/2 + 200*x, screen_height/2 + 30*y))
 #OTHER
 i = 1
 BREAK = False
 clock = pygame.time.Clock()
+MENU = True
 #sizes
 ###########################################################################
 ###########################################################################
@@ -75,12 +83,19 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if start_rect.x <= mouse[0] <= start_rect.x + start_rect.width and start_rect.y <= mouse[1] <= start_rect.y + start_rect.height:
+                MENU = False
+            elif exit_rect.x <= mouse[0] <= exit_rect.x + exit_rect.width and exit_rect.y <= mouse[1] <= exit_rect.y + exit_rect.height:
+                pygame.quit()
+                sys.exit()
     
     #### 
     screen.fill("grey13")
-    clock.tick(60)
+    clock.tick(80)
     #### 
     # updates
+    mouse = pygame.mouse.get_pos()
 
     # surfaces(blit and location)
     screen.blit(background, (0, 0))
@@ -88,18 +103,22 @@ while True:
     screen.blit(ship, (i, math.floor(screen_height/4*3.1)))
     
     # MAIN SCREEN SHIP MOVEMENT
-    if i >= screen.get_width() - ship.get_width():
-        BREAK = True
-    elif i <= 0:
-        BREAK = False
-        
-    if BREAK == True:
-        i = i - 4*x
-    else: i = i + 4*x
+    if MENU == True:
+        if i >= screen.get_width() - ship.get_width():
+            BREAK = True
+        elif i <= 0:
+            BREAK = False
+            
+        if BREAK == True:
+            i = i - 3*x
+        else: i = i + 3*x
 
-    #MAIN SCREEN TEXT
-    screen.blit(text0, (screen_width/2 - text0.get_width()/2, screen_height/2-(30*y) - text0.get_height()/2))
-   
+        #MAIN SCREEN TEXT
+        screen.blit(text0, (screen_width/2 - text0.get_width()/2, screen_height/2-(30*y) - text0.get_height()/2))
+        #MAIN SCREEN BUTTONS
+        screen.blit(START_butt, start_rect)
+        screen.blit(EXIT_butt, exit_rect)
+    
         
 
                
