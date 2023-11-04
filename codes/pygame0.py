@@ -11,7 +11,7 @@ class Settings:
     resolution = "Normal"
 
     window_sizes = ["Small", "Normal", "Big", "Full"]
-    window_size = "Big"
+    window_size = "Normal"
 
     gameplay_options = ["Arrows/Space", "Mouse", "Mouse/Space", "WASD/Space", "WASD/Mouse"]
     gameplay = "Mouse"
@@ -61,9 +61,10 @@ SETTINGS_butt_scale = pygame.transform.scale(SETTINGS_butt, (37*x,37*y))
 
 #TEXT
 font_size = 50
-font = pygame.font.Font("graphics/subatomic.ttf", font_size)
-text0 = font.render("Meteor shooter", True, "grey50")
-gameplay_text0 = font.render("Gameplay: ", True, "grey50")
+font0 = pygame.font.Font("graphics/subatomic.ttf", font_size)
+font1 = pygame.font.Font("graphics/Oswald-Medium.ttf", font_size)
+text0 = font0.render("Meteor shooter", True, "grey50")
+gameplay_text0 = font1.render(f"Gameplay:  <-   {sets.gameplay}   -> ", True, "grey40")
 
 #OBJECT SETTINGS
 ship_rect = ship.get_rect(center = (screen_width/2, math.floor(screen_height/4*3.1)))
@@ -80,10 +81,10 @@ move_up = False
 move_down = False
 move_left = False
 move_right = False
-
-
-
-
+index0 = 0
+max_index0 = len(sets.gameplay_options) - 1
+settings_selected_any = False
+settings_selected_index = 0
 
 
 
@@ -105,14 +106,36 @@ while True:
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == pygame.BUTTON_LEFT:
             if start_rect.x <= mouse[0] <= start_rect.x + start_rect.width and start_rect.y <= mouse[1] <= start_rect.y + start_rect.height:
                 MENU = False
-            if exit_rect.x <= mouse[0] <= exit_rect.x + exit_rect.width and exit_rect.y <= mouse[1] <= exit_rect.y + exit_rect.height:
+            if exit_rect.x <= mouse[0] <= exit_rect.x + exit_rect.width and exit_rect.y <= mouse[1] <= exit_rect.y + exit_rect.height and MENU == True:
                 pygame.quit()
                 sys.exit()
             if settings_rect.x <= mouse[0] <= settings_rect.x + settings_rect.width and settings_rect.y <= mouse[1] <= settings_rect.y + settings_rect.height:
                 SETTINGS = True
                 MENU = False
-            
+            if SETTINGS == True and screen_width/2-gameplay_text0.get_width() <= mouse[0] <= screen_width/2+gameplay_text0.get_width() and screen_height/4 <= mouse[1] <= screen_height/4+gameplay_text0.get_height():
+                
+                index0 = index0 +1
+                sets.gameplay = sets.gameplay_options[index0]
+                gameplay_text0 = font1.render(f"Gameplay:  <-   {sets.gameplay}   -> ", True, "grey40")
+        
+        if event.type == pygame.KEYDOWN and SETTINGS == True:
+            if event.key == pygame.K_RETURN:
+                if settings_selected_any == False:
+                    settings_selected_any = True
+                    settings_selected_index = settings_selected_index + 1
+                    
+                elif settings_selected_any == True:
+                    settings_selected_any = False
+                    settings_selected_index = 0
 
+        if SETTINGS == False and settings_selected_any == True:
+            settings_selected_any = False
+            settings_selected_index = 0
+            
+                    
+
+        if index0 == max_index0:
+            index0 = 0
         
         if event.type == pygame.MOUSEMOTION and MENU == False and SETTINGS == False and Settings.gameplay == "Mouse":
             ship_rect.center = event.pos
@@ -163,6 +186,7 @@ while True:
         move_right = pygame.K_RIGHT
     elif sets.gameplay == "Mouse":
         pass
+        shoot
 
 
 
@@ -201,7 +225,10 @@ while True:
     if MENU == False and SETTINGS == False:
         screen.blit(ship, ship_rect)
     if SETTINGS == True:
-        screen.blit(text0, (screen_width/2 - text0.get_width()/2, screen_height/2-(30*y) - text0.get_height()/2))
+        screen.blit(gameplay_text0, (screen_width/3, screen_height/4))
+        if settings_selected_index == 1 and settings_selected_any == True:
+            pygame.draw.rect(screen, "grey", gameplay_text0.get_rect(topleft = (screen_width/3-5*x, screen_height/4)), 3)
+            
     ### SETTINGS
 
     
