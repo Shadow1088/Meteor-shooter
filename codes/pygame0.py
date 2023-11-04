@@ -1,5 +1,4 @@
 import pygame, sys
-import time
 import math
 
 pygame.init()
@@ -86,16 +85,7 @@ move_right = False
 
 
 
-if sets.gameplay not in sets.gameplay_options:
-    print("Invalid gameplay option.")
-elif sets.gameplay == "Arrows/Space":
-    shoot = pygame.K_SPACE
-    move_up = pygame.K_UP
-    move_down = pygame.K_DOWN
-    move_left = pygame.K_LEFT
-    move_right = pygame.K_RIGHT
-elif sets.gameplay == "Mouse":
-    pass
+
 
 def shoot():
     pass
@@ -124,7 +114,7 @@ while True:
             
 
         
-        if event.type == pygame.MOUSEMOTION and MENU == False and Settings.gameplay == "Mouse":
+        if event.type == pygame.MOUSEMOTION and MENU == False and SETTINGS == False and Settings.gameplay == "Mouse":
             ship_rect.center = event.pos
             
         if event.type == pygame.KEYDOWN and MENU == False:
@@ -142,6 +132,7 @@ while True:
                 move_right = True
             if event.key == pygame.K_r:
                 MENU = True
+                SETTINGS = False
 
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_UP:
@@ -162,7 +153,21 @@ while True:
     if move_right == True:
         ship_rect.x += 10
 
-    
+    if sets.gameplay not in sets.gameplay_options:
+        print("Invalid gameplay option.")
+    elif sets.gameplay == "Arrows/Space":
+        shoot = pygame.K_SPACE
+        move_up = pygame.K_UP
+        move_down = pygame.K_DOWN
+        move_left = pygame.K_LEFT
+        move_right = pygame.K_RIGHT
+    elif sets.gameplay == "Mouse":
+        pass
+
+
+
+
+
     #### 
     screen.fill("grey13")
     clock.tick(80)
@@ -198,6 +203,8 @@ while True:
     if SETTINGS == True:
         screen.blit(text0, (screen_width/2 - text0.get_width()/2, screen_height/2-(30*y) - text0.get_height()/2))
     ### SETTINGS
+
+    
         
 
                
