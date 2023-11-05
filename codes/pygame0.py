@@ -220,26 +220,26 @@ while True:
                 else:        
                     SETTINGS = True
                     MENU = False
-            if event.key == pygame.K_UP and SETTINGS == False and sets.gameplay == "Arrows/Space":
-                move_up = True
-                print("up")    
-            if event.key == pygame.K_DOWN and SETTINGS == False and sets.gameplay == "Arrows/Space":
-                move_down = True
-            if event.key == pygame.K_LEFT and SETTINGS == False and sets.gameplay == "Arrows/Space":
-                move_left = True
-            if event.key == pygame.K_RIGHT and SETTINGS == False and sets.gameplay == "Arrows/Space":
-                move_right = True
-
-
+        if MENU == False:
+            keys = pygame.key.get_pressed()
+            if sets.gameplay == "Arrows/Space":
+                move_up = keys[pygame.K_UP]
+                move_down = keys[pygame.K_DOWN]
+                move_left = keys[pygame.K_LEFT]
+                move_right = keys[pygame.K_RIGHT]
         if event.type == pygame.KEYUP:
-            if event.key == pygame.K_UP:
-                move_up = False
-            if event.key == pygame.K_DOWN:
-                move_down = False
-            if event.key == pygame.K_LEFT:
-                move_left = False
-            if event.key == pygame.K_RIGHT:
-                move_right = False
+            if sets.gameplay == "Arrows/Space":
+                if event.key == pygame.K_UP:
+                    move_up = False
+                if event.key == pygame.K_DOWN:
+                    move_down = False
+                if event.key == pygame.K_LEFT:
+                    move_left = False
+                if event.key == pygame.K_RIGHT:
+                    move_right = False
+
+
+        
     if index0 == max_index0:
         index0 = -1
     if index1 == max_index1:
@@ -261,11 +261,7 @@ while True:
     if sets.gameplay not in sets.gameplay_options:
         print("Invalid gameplay option.")
     elif sets.gameplay == "Arrows/Space":
-        shoot = pygame.K_SPACE
-        move_up = pygame.K_UP
-        move_down = pygame.K_DOWN
-        move_left = pygame.K_LEFT
-        move_right = pygame.K_RIGHT
+        pass
     elif sets.gameplay == "Mouse":
         pass
 
@@ -298,7 +294,7 @@ while True:
         screen.blit(START_butt, start_rect)
         screen.blit(EXIT_butt, exit_rect)
     if MENU == False and SETTINGS == False:
-        screen.blit(ship, ship_rect)
+        screen.blit(ship, (ship_rect.x, ship_rect.y))
     if SETTINGS == True:
         screen.blit(gameplay_text0, (screen_width/3, screen_height/4))
         if settings_selected_index == 0 and settings_selected_any == True:
