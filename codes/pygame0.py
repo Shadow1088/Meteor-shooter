@@ -92,6 +92,7 @@ settings_selected_any = False
 settings_selected_index = 0
 
 win_changed = False
+menu_was_true = False
 
 
 
@@ -106,6 +107,17 @@ def shoot():
 
 
 while True:
+    
+    
+            
+    if MENU == False and SETTINGS == False:
+        print("GAME")
+    if MENU == True:
+        print("MENU")
+    if SETTINGS == True:
+        print("SETTINGS")
+    if MENU == True and SETTINGS == True:
+        print("MENU AND SETTINGS")
     
     if index1 == 0:
         if win_changed:
@@ -235,13 +247,21 @@ while True:
         if event.type == pygame.MOUSEMOTION and MENU == False and SETTINGS == False and sets.gameplay == "Mouse":
             ship_rect.center = event.pos
         
-        if event.type == pygame.KEYDOWN and MENU == False:
+        if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 if SETTINGS == True:
                     SETTINGS = False
+                    if menu_was_true:
+                        MENU = True
+                        menu_was_true = False
+                elif MENU == True:
+                    menu_was_true = True
+                    SETTINGS = True
+                    MENU = False
                 else:        
                     SETTINGS = True
                     MENU = False
+                
         if MENU == False:
             keys = pygame.key.get_pressed()
             if sets.gameplay == "Arrows/Space":
