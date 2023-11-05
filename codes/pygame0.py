@@ -19,10 +19,6 @@ sets = Settings()
 
 ###xxx###
 
-# RESOLUTIONS
-
-###xxx###
-
 if sets.window_size not in sets.window_sizes:
     print("Invalid window size.")
 elif sets.window_size == "Small":
@@ -133,7 +129,10 @@ while True:
     if win_changed:
         print(index1)
 
-
+    if index1 == 2:
+        index1 = 1
+    if index1 == -2:
+        index1 = 1
 
     #### events
     
@@ -147,9 +146,13 @@ while True:
             if exit_rect.x <= mouse[0] <= exit_rect.x + exit_rect.width and exit_rect.y <= mouse[1] <= exit_rect.y + exit_rect.height and MENU == True:
                 pygame.quit()
                 sys.exit()
-            if settings_rect.x <= mouse[0] <= settings_rect.x + settings_rect.width and settings_rect.y <= mouse[1] <= settings_rect.y + settings_rect.height:
+            if settings_rect.x <= mouse[0] <= settings_rect.x + settings_rect.width and settings_rect.y <= mouse[1] <= settings_rect.y + settings_rect.height and SETTINGS == False:
                 SETTINGS = True
                 MENU = False
+            elif SETTINGS == True and settings_rect.x <= mouse[0] <= settings_rect.x + settings_rect.width and settings_rect.y <= mouse[1] <= settings_rect.y + settings_rect.height:
+                SETTINGS = False
+                
+
             if SETTINGS == True and screen_width/2-gameplay_text0.get_width() <= mouse[0] <= screen_width/2+gameplay_text0.get_width() and screen_height/4 <= mouse[1] <= screen_height/4+gameplay_text0.get_height():
                 index0 = index0 +1
                 sets.gameplay = sets.gameplay_options[index0]
@@ -158,12 +161,24 @@ while True:
                 win_changed = True
                 index1 = index1 +1
                 sets.window_size = sets.window_sizes[index1]
-                window_size_text0 = font1.render(f"Window size:  <-   {sets.window_size}   -> ", True, "grey40")
+                if sets.window_size != "Big":
+                    window_size_text0 = font1.render(f"Window size:  <-   {sets.window_size}   -> (unfinished)", True, "grey40")
+                else:
+                    window_size_text0 = font1.render(f"Window size:  <-   {sets.window_size}   ->      (default)", True, "grey40")
         
         if event.type == pygame.KEYDOWN and event.key == pygame.K_r and MENU == False:
             MENU = True
             SETTINGS = False
             print("r")
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_s and MENU == True:
+            MENU = False
+            SETTINGS = False
+            print("s")
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_e and MENU == True:
+            pygame.quit()
+            sys.exit()
+        
+            
 
         if event.type == pygame.KEYDOWN and SETTINGS == True:
             if event.key == pygame.K_RETURN:
@@ -194,9 +209,14 @@ while True:
                     sets.gameplay = sets.gameplay_options[index0]
                     gameplay_text0 = font1.render(f"Gameplay:  <-   {sets.gameplay}   -> ", True, "grey40")
                 if settings_selected_index == 1:
+                    
                     index1 = index1 - 1
                     sets.window_size = sets.window_sizes[index1]
-                    window_size_text0 = font1.render(f"Window size:  <-   {sets.window_size}   -> ", True, "grey40")
+                    if sets.window_size != "Big":
+                        window_size_text0 = font1.render(f"Window size:  <-   {sets.window_size}   -> (unfinished)", True, "grey40")
+                    else:
+                        window_size_text0 = font1.render(f"Window size:  <-   {sets.window_size}   ->      (default)", True, "grey40")
+                    
             if event.key == pygame.K_RIGHT:
                 if settings_selected_index == 0:
                     index0 = index0 + 1
@@ -205,8 +225,10 @@ while True:
                 if settings_selected_index == 1:
                     index1 = index1 + 1
                     sets.window_size = sets.window_sizes[index1]
-                    window_size_text0 = font1.render(f"Window size:  <-   {sets.window_size}   -> ", True, "grey40")
-                    
+                    if sets.window_size != "Big":
+                        window_size_text0 = font1.render(f"Window size:  <-   {sets.window_size}   -> (unfinished)", True, "grey40")
+                    else:
+                        window_size_text0 = font1.render(f"Window size:  <-   {sets.window_size}   ->      (default)", True, "grey40")
 
     
     
@@ -239,7 +261,6 @@ while True:
                     move_right = False
 
 
-        
     if index0 == max_index0:
         index0 = -1
     if index1 == max_index1:
@@ -247,16 +268,16 @@ while True:
 
     if move_up:
         ship_rect.y = ship_rect.y - 10
-        print("up")
+        
     if move_down:
         ship_rect.y = ship_rect.y + 10
-        print("down")
+        
     if move_left:
         ship_rect.x = ship_rect.x - 10
-        print("left")
+        
     if move_right:
         ship_rect.x = ship_rect.x + 10
-        print("right")
+        
 
     if sets.gameplay not in sets.gameplay_options:
         print("Invalid gameplay option.")
@@ -291,8 +312,8 @@ while True:
         #MAIN SCREEN TEXT
         screen.blit(text0, (screen_width/2 - text0.get_width()/2, screen_height/2-(30*y) - text0.get_height()/2))
         #MAIN SCREEN BUTTONS
-        screen.blit(START_butt, start_rect)
-        screen.blit(EXIT_butt, exit_rect)
+        screen.blit(START_butt, (start_rect.x, start_rect.y))
+        screen.blit(EXIT_butt, (exit_rect.x, exit_rect.y))
     if MENU == False and SETTINGS == False:
         screen.blit(ship, (ship_rect.x, ship_rect.y))
     if SETTINGS == True:
