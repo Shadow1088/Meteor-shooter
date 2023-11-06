@@ -101,24 +101,13 @@ def shoot():
     pass
 
 #sizes
-###########################################################################
-###########################################################################
-
+#############################################################################################################################
+#############################################################################################################################
+#############################################################################################################################
 
 
 while True:
-    
-    
-            
-    if MENU == False and SETTINGS == False:
-        print("GAME")
-    if MENU == True:
-        print("MENU")
-    if SETTINGS == True:
-        print("SETTINGS")
-    if MENU == True and SETTINGS == True:
-        print("MENU AND SETTINGS")
-    
+    #SCREEN SIZE CHANGING
     if index1 == 0:
         if win_changed:
             #screenxy = (800, 400)
@@ -141,29 +130,40 @@ while True:
     if win_changed:
         print(index1)
 
+    # INDEX RESETING - so the index doesnt go out of range
     if index1 == 2:
         index1 = 1
     if index1 == -2:
         index1 = 1
 
-    #### events
+    #### EVENTS
     
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == pygame.BUTTON_LEFT:
+            
+            # BUTTONS
+            
             if start_rect.x <= mouse[0] <= start_rect.x + start_rect.width and start_rect.y <= mouse[1] <= start_rect.y + start_rect.height and MENU == True:
                 MENU = False
             if exit_rect.x <= mouse[0] <= exit_rect.x + exit_rect.width and exit_rect.y <= mouse[1] <= exit_rect.y + exit_rect.height and MENU == True:
                 pygame.quit()
                 sys.exit()
             if settings_rect.x <= mouse[0] <= settings_rect.x + settings_rect.width and settings_rect.y <= mouse[1] <= settings_rect.y + settings_rect.height and SETTINGS == False:
+                if MENU == True: #if activated SETTINGS from MENU, after DEactivation go back to MENU
+                    menu_was_true = True
                 SETTINGS = True
                 MENU = False
+                
             elif SETTINGS == True and settings_rect.x <= mouse[0] <= settings_rect.x + settings_rect.width and settings_rect.y <= mouse[1] <= settings_rect.y + settings_rect.height:
                 SETTINGS = False
+                if menu_was_true: #same comment as above (line 155)
+                    MENU = True
+                    menu_was_true = False
                 
+            # SETTING CHANGING
 
             if SETTINGS == True and screen_width/2-gameplay_text0.get_width() <= mouse[0] <= screen_width/2+gameplay_text0.get_width() and screen_height/4 <= mouse[1] <= screen_height/4+gameplay_text0.get_height():
                 index0 = index0 +1
@@ -178,6 +178,8 @@ while True:
                 else:
                     window_size_text0 = font1.render(f"Window size:  <-   {sets.window_size}   ->      (default)", True, "grey40")
         
+        # MENU KEYBOARD SHORTCUTS
+
         if event.type == pygame.KEYDOWN and event.key == pygame.K_r and MENU == False:
             MENU = True
             SETTINGS = False
@@ -187,10 +189,11 @@ while True:
             SETTINGS = False
             print("s")
         if event.type == pygame.KEYDOWN and event.key == pygame.K_e and MENU == True:
+            print("e")
             pygame.quit()
             sys.exit()
         
-            
+        # RECTANGLE AROUND CHOSEN OPTION ON ENTER KEY IN SETTINGS
 
         if event.type == pygame.KEYDOWN and SETTINGS == True:
             if event.key == pygame.K_RETURN:
@@ -202,10 +205,12 @@ while True:
                     settings_selected_any = False
                     settings_selected_index = 0
 
+        # REMOVE RECTANGLE IF NOT IN SETTINGS
         if SETTINGS == False and settings_selected_any == True:
             settings_selected_any = False
             settings_selected_index = 0
         
+        # SETTINGS KEYBOARD SHORTCUTS - Arrow keys
         if event.type == pygame.KEYDOWN and SETTINGS == True and settings_selected_any == True:
             if event.key == pygame.K_DOWN:
                 settings_selected_index = settings_selected_index + 1
@@ -221,14 +226,12 @@ while True:
                     sets.gameplay = sets.gameplay_options[index0]
                     gameplay_text0 = font1.render(f"Gameplay:  <-   {sets.gameplay}   -> ", True, "grey40")
                 if settings_selected_index == 1:
-                    
                     index1 = index1 - 1
                     sets.window_size = sets.window_sizes[index1]
                     if sets.window_size != "Big":
                         window_size_text0 = font1.render(f"Window size:  <-   {sets.window_size}   -> (unfinished)", True, "grey40")
                     else:
-                        window_size_text0 = font1.render(f"Window size:  <-   {sets.window_size}   ->      (default)", True, "grey40")
-                    
+                        window_size_text0 = font1.render(f"Window size:  <-   {sets.window_size}   ->  (default)", True, "grey40")        
             if event.key == pygame.K_RIGHT:
                 if settings_selected_index == 0:
                     index0 = index0 + 1
@@ -240,13 +243,15 @@ while True:
                     if sets.window_size != "Big":
                         window_size_text0 = font1.render(f"Window size:  <-   {sets.window_size}   -> (unfinished)", True, "grey40")
                     else:
-                        window_size_text0 = font1.render(f"Window size:  <-   {sets.window_size}   ->      (default)", True, "grey40")
+                        window_size_text0 = font1.render(f"Window size:  <-   {sets.window_size}   ->  (default)", True, "grey40")
 
     
-    
+        # IF GAMEPLAY IS MOUSE, SHIP MOVES AS MOUSE MOVES
         if event.type == pygame.MOUSEMOTION and MENU == False and SETTINGS == False and sets.gameplay == "Mouse":
             ship_rect.center = event.pos
         
+        # ESCAPE FOR SETTINGS
+        # made this so when you enter settings from menu, you will go back to menu after pressing it again
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 if SETTINGS == True:
@@ -262,6 +267,8 @@ while True:
                     SETTINGS = True
                     MENU = False
                 
+
+        # MOVEMENT CONTINUOS IF ARROW KEY PRESSED DOWN
         if MENU == False:
             keys = pygame.key.get_pressed()
             if sets.gameplay == "Arrows/Space":
@@ -280,25 +287,23 @@ while True:
                 if event.key == pygame.K_RIGHT:
                     move_right = False
 
-
+    # INDEX RESETING - so the index doesnt go out of range
     if index0 == max_index0:
         index0 = -1
     if index1 == max_index1:
         index1 = -1
 
+    # MOVEMENT SPEED
     if move_up:
-        ship_rect.y = ship_rect.y - 10
-        
+        ship_rect.y = ship_rect.y - 10 
     if move_down:
         ship_rect.y = ship_rect.y + 10
-        
     if move_left:
-        ship_rect.x = ship_rect.x - 10
-        
+        ship_rect.x = ship_rect.x - 10        
     if move_right:
         ship_rect.x = ship_rect.x + 10
         
-
+    # GAMEPLAY OPTIONS (ignore this)
     if sets.gameplay not in sets.gameplay_options:
         print("Invalid gameplay option.")
     elif sets.gameplay == "Arrows/Space":
@@ -306,11 +311,10 @@ while True:
     elif sets.gameplay == "Mouse":
         pass
 
-    #### 
+    # screen filled with colour and topped fps
     screen.fill("grey13")
     clock.tick(80)
-    #### 
-    # updates
+    
     mouse = pygame.mouse.get_pos()
 
     # surfaces(blit and location)
@@ -334,16 +338,19 @@ while True:
         #MAIN SCREEN BUTTONS
         screen.blit(START_butt, (start_rect.x, start_rect.y))
         screen.blit(EXIT_butt, (exit_rect.x, exit_rect.y))
+    # INGAME SHIP MOVEMENT
     if MENU == False and SETTINGS == False:
         screen.blit(ship, (ship_rect.x, ship_rect.y))
+    # SETTINGS
     if SETTINGS == True:
         screen.blit(gameplay_text0, (screen_width/3, screen_height/4))
         if settings_selected_index == 0 and settings_selected_any == True:
             pygame.draw.rect(screen, "grey", gameplay_text0.get_rect(topleft = (screen_width/3-5*x, screen_height/4)), 3)
+        screen.blit(window_size_text0, (screen_width/3, screen_height/4*2))
         if settings_selected_index == 1 and settings_selected_any == True:
             pygame.draw.rect(screen, "grey", window_size_text0.get_rect(topleft = (screen_width/3-5*x, screen_height/4*2)), 3)
         
-        screen.blit(window_size_text0, (screen_width/3, screen_height/4*2))
+        
     
                
 #x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#
