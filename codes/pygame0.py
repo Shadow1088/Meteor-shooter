@@ -57,6 +57,7 @@ START_butt = pygame.image.load("graphics/START.png").convert_alpha()
 EXIT_butt = pygame.image.load("graphics/EXIT.png").convert_alpha()
 SETTINGS_butt = pygame.image.load("graphics/SETTINGS.png").convert_alpha()
 SETTINGS_butt_scale = pygame.transform.scale(SETTINGS_butt, (37*x,37*y))
+LASER = pygame.image.load("graphics/laser.png").convert_alpha()
 
 
 #TEXT
@@ -72,6 +73,7 @@ ship_rect = ship.get_rect(center = (screen_width/2, math.floor(screen_height/4*3
 start_rect = START_butt.get_rect(center = (screen_width/2 - 200*x, screen_height/2 + 30*y))
 exit_rect = EXIT_butt.get_rect(center = (screen_width/2 + 200*x, screen_height/2 + 30*y))
 settings_rect = SETTINGS_butt.get_rect(center = (screen_width - 50*x, 10*y))
+laser_rect = LASER.get_rect(midbottom = (ship_rect.centerx, ship_rect.top))
 
 
 #OTHER
@@ -95,10 +97,9 @@ win_changed = False
 menu_was_true = False
 
 
-
+lasers = []
 def shoot():
-
-    pass
+    screen.blit(LASER, (laser_rect.x, laser_rect.y))
 
 #sizes
 #############################################################################################################################
@@ -269,13 +270,16 @@ while True:
                 
 
         # MOVEMENT CONTINUOS IF ARROW KEY PRESSED DOWN
-        if MENU == False:
+        if MENU == False and SETTINGS == False:
             keys = pygame.key.get_pressed()
             if sets.gameplay == "Arrows/Space":
                 move_up = keys[pygame.K_UP]
                 move_down = keys[pygame.K_DOWN]
                 move_left = keys[pygame.K_LEFT]
                 move_right = keys[pygame.K_RIGHT]
+            if event.type == pygame.K_SPACE:
+                if keys[pygame.K_SPACE]:
+                    shoot()
         if event.type == pygame.KEYUP:
             if sets.gameplay == "Arrows/Space":
                 if event.key == pygame.K_UP:
@@ -286,6 +290,7 @@ while True:
                     move_left = False
                 if event.key == pygame.K_RIGHT:
                     move_right = False
+        
 
     # INDEX RESETING - so the index doesnt go out of range
     if index0 == max_index0:
@@ -350,9 +355,15 @@ while True:
         if settings_selected_index == 1 and settings_selected_any == True:
             pygame.draw.rect(screen, "grey", window_size_text0.get_rect(topleft = (screen_width/3-5*x, screen_height/4*2)), 3)
         
-        
-    
-               
+    if ship_rect.top < 0:
+        ship_rect.top = 0
+    if ship_rect.bottom > screen_height:
+        ship_rect.bottom = screen_height
+    if ship_rect.left < 0:
+        ship_rect.left = 0
+    if ship_rect.right > screen_width:
+        ship_rect.right = screen_width
+
 #x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#
         
 
