@@ -1,5 +1,6 @@
 import pygame, sys
 import math
+import time
 
 pygame.init()
 
@@ -95,11 +96,32 @@ settings_selected_index = 0
 
 win_changed = False
 menu_was_true = False
+shoots = False
+last_reload = 0
+reload_time = 0.2
 
 
+
+class Laser:
+    def __init__(self, x, y, direction, speed, img):
+        self.x = x
+        self.y = y
+        self.direction = direction
+        self.speed = speed
+        self.img = img
+
+    def lsr_update(self):
+        if self.direction == "up":
+            self.y -= self.speed
+
+    def draw(self, screen):
+        screen.blit(self.img, (self.x-5, self.y-5))
+
+
+basic_lsr = Laser(ship_rect.midtop, ship_rect.top+5, "up", 10, LASER)
 lasers = []
 def shoot():
-    screen.blit(LASER, (laser_rect.x, laser_rect.y))
+    lasers.append(Laser(ship_rect.centerx, ship_rect.top, "up", 10, LASER))
 
 #sizes
 #############################################################################################################################
@@ -108,6 +130,8 @@ def shoot():
 
 
 while True:
+    time.time()
+    
     #SCREEN SIZE CHANGING
     if index1 == 0:
         if win_changed:
@@ -277,9 +301,16 @@ while True:
                 move_down = keys[pygame.K_DOWN]
                 move_left = keys[pygame.K_LEFT]
                 move_right = keys[pygame.K_RIGHT]
-            if event.type == pygame.K_SPACE:
-                if keys[pygame.K_SPACE]:
+            
+                if move_up:
+                    print("yes")
+
+                if keys[pygame.K_SPACE] and time.time() - last_reload > reload_time:
                     shoot()
+                    last_reload = time.time()
+            
+            
+
         if event.type == pygame.KEYUP:
             if sets.gameplay == "Arrows/Space":
                 if event.key == pygame.K_UP:
@@ -363,6 +394,15 @@ while True:
         ship_rect.left = 0
     if ship_rect.right > screen_width:
         ship_rect.right = screen_width
+
+    # LASERS
+    for lsr in lasers:
+        lsr.draw(screen)
+        lsr.lsr_update()
+        if lsr.y < 0:
+            lasers.remove(lsr)
+        
+
 
 #x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#
         
