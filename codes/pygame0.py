@@ -335,10 +335,15 @@ while True:
     if move_down:
         ship_rect.y = ship_rect.y + 10
     if move_left:
-        ship_rect.x = ship_rect.x - 10        
+        ship_rect.x = ship_rect.x - 10
     if move_right:
         ship_rect.x = ship_rect.x + 10
-        
+
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_SPACE] and time.time() - last_reload > reload_time:
+        shoot()
+        last_reload = time.time()
+
     # GAMEPLAY OPTIONS (ignore this)
     if sets.gameplay not in sets.gameplay_options:
         print("Invalid gameplay option.")
