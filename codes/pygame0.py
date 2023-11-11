@@ -308,6 +308,8 @@ while True:
                 if keys[pygame.K_SPACE] and time.time() - last_reload > reload_time:
                     shoot()
                     last_reload = time.time()
+
+        
             
             
 
