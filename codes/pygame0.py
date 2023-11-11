@@ -1,6 +1,7 @@
 import pygame, sys
 import math
 import time
+import random
 
 pygame.init()
 
@@ -59,7 +60,7 @@ EXIT_butt = pygame.image.load("graphics/EXIT.png").convert_alpha()
 SETTINGS_butt = pygame.image.load("graphics/SETTINGS.png").convert_alpha()
 SETTINGS_butt_scale = pygame.transform.scale(SETTINGS_butt, (37*x,37*y))
 LASER = pygame.image.load("graphics/laser.png").convert_alpha()
-
+METEOR = pygame.image.load("graphics/meteor.png").convert_alpha()
 
 #TEXT
 font_size = 50
@@ -75,6 +76,7 @@ start_rect = START_butt.get_rect(center = (screen_width/2 - 200*x, screen_height
 exit_rect = EXIT_butt.get_rect(center = (screen_width/2 + 200*x, screen_height/2 + 30*y))
 settings_rect = SETTINGS_butt.get_rect(center = (screen_width - 50*x, 10*y))
 laser_rect = LASER.get_rect(midbottom = (ship_rect.centerx, ship_rect.top))
+meteor_rect = METEOR.get_rect(center = (screen_width/2, screen_height/2))
 
 
 #OTHER
@@ -100,7 +102,24 @@ shoots = False
 last_reload = 0
 reload_time = 0.2
 
+class Meteor:
+    def __init__(self, x, y, speed, img, angle = random.randint(0, 360)):
+        self.x = x
+        self.y = y
+        self.speed = speed
+        self.img = img
+        self.angle = angle
 
+    def update(self):
+        self.y += self.speed
+
+    def draw(self, screen):
+        screen.blit(self.img, (self.x, self.y))
+
+meteors = []
+meteor_spawn_time = 1.0
+last_meteor_spawn_time = 0.0
+angle = 0
 
 class Laser:
     def __init__(self, x, y, direction, speed, img):
@@ -111,17 +130,17 @@ class Laser:
         self.img = img
 
     def lsr_update(self):
-        if self.direction == "up":
+        if self.direction == -1:
             self.y -= self.speed
 
     def draw(self, screen):
         screen.blit(self.img, (self.x-5, self.y-5))
 
 
-basic_lsr = Laser(ship_rect.midtop, ship_rect.top+5, "up", 10, LASER)
+basic_lsr = Laser(ship_rect.midtop, ship_rect.top+5, -1, 10, LASER)
 lasers = []
 def shoot():
-    lasers.append(Laser(ship_rect.centerx, ship_rect.top, "up", 10, LASER))
+    lasers.append(Laser(ship_rect.centerx, ship_rect.top, -1, 10, LASER))
 
 #sizes
 #############################################################################################################################
@@ -296,23 +315,24 @@ while True:
         # MOVEMENT CONTINUOS IF ARROW KEY PRESSED DOWN
         if MENU == False and SETTINGS == False:
             keys = pygame.key.get_pressed()
-            if sets.gameplay == "Arrows/Space":
-                move_up = keys[pygame.K_UP]
-                move_down = keys[pygame.K_DOWN]
-                move_left = keys[pygame.K_LEFT]
-                move_right = keys[pygame.K_RIGHT]
+            if sets.gameplay == "Arrows/Space" or sets.gameplay == "WASD/Space" or sets.gameplay == "WASD/Mouse":
+                move_up = keys[pygame.K_UP] or keys[pygame.K_w]
+                move_down = keys[pygame.K_DOWN] or keys[pygame.K_s]
+                move_left = keys[pygame.K_LEFT] or keys[pygame.K_a]
+                move_right = keys[pygame.K_RIGHT] or keys[pygame.K_d]
             
-                if move_up:
-                    print("yes")
-
+                if keys[pygame.K_SPACE] and time.time() - last_reload > reload_time and sets.gameplay != "WASD/Mouse":
+                    shoot()
+                    last_reload = time.time()
+            if sets.gameplay == "Mouse" or sets.gameplay == "WASD/Mouse":
+                if pygame.mouse.get_pressed()[0] and time.time() - last_reload > reload_time:
+                    shoot()
+                    last_reload = time.time()
+            if sets.gameplay == "Mouse/Space":
+                ship_rect.center = pygame.mouse.get_pos()
                 if keys[pygame.K_SPACE] and time.time() - last_reload > reload_time:
                     shoot()
                     last_reload = time.time()
-
-        
-            
-            
-
         if event.type == pygame.KEYUP:
             if sets.gameplay == "Arrows/Space":
                 if event.key == pygame.K_UP:
@@ -340,6 +360,9 @@ while True:
         ship_rect.x = ship_rect.x - 10        
     if move_right:
         ship_rect.x = ship_rect.x + 10
+
+
+
         
     # GAMEPLAY OPTIONS (ignore this)
     if sets.gameplay not in sets.gameplay_options:
@@ -403,7 +426,39 @@ while True:
         lsr.lsr_update()
         if lsr.y < 0:
             lasers.remove(lsr)
-        
+
+    ##  METEORS
+    for meteor in meteors:
+        if meteor.y > screen_height:
+            meteors.remove(meteor)
+    # SPAWN METEORS
+    if time.time() - last_meteor_spawn_time > meteor_spawn_time and SETTINGS == False and MENU == False:
+        meteors.append(Meteor(random.randint(0, screen_width - meteor_rect.width), y-meteor_rect.height, 5, rotated_meteor))
+        last_meteor_spawn_time = time.time()
+
+    # UPDATE AND DRAW METEORS
+    for meteor in meteors:
+        meteor.update()
+        meteor.draw(screen)
+    angle=angle+1
+    rotated_meteor = pygame.transform.rotate(METEOR, angle)
+
+    # COLLISIONS
+    #LASER AND METEOR
+    for meteor in meteors:
+        meteor_rect = pygame.Rect(meteor.x, meteor.y, meteor.img.get_width(), meteor.img.get_height())
+        for lsr in lasers:
+            lsr_rect = pygame.Rect(lsr.x, lsr.y, lsr.img.get_width(), lsr.img.get_height())
+            if meteor_rect.colliderect(lsr_rect): 
+                meteors.remove(meteor)
+                lasers.remove(lsr)  
+    #SHIP AND METEOR
+    for meteor in meteors:
+        meteor_rect = pygame.Rect(meteor.x, meteor.y, meteor.img.get_width(), meteor.img.get_height())
+        if meteor_rect.colliderect(ship_rect):
+            print("GAME OVER")
+            pygame.quit()
+            sys.exit()
 
 
 #x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#
