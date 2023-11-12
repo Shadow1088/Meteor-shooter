@@ -8,6 +8,10 @@ pygame.init()
 ###########################################################################
 ###########################################################################
 
+DIFFICULTY = 0.0 # 0%, 100% = 1.0 (1.0 = 1 second, so the meteors would spawn instantly..
+#                              honestly its insane, but the ship is too weak for it now)
+#                              CHANGE THIS HOW MUCH YOU WANT, BUT KEEP IN MIND IT MIGHT BE UNPLAYABLE
+
 class Settings:
     resolutions = ["Low", "Normal", "High"]
     resolution = "Normal"
@@ -443,7 +447,7 @@ while True:
         if meteor.y > screen_height:
             meteors.remove(meteor)
     # SPAWN METEORS
-    if time.time() - last_meteor_spawn_time > meteor_spawn_time and SETTINGS == False and MENU == False:
+    if (time.time() - last_meteor_spawn_time)+DIFFICULTY > meteor_spawn_time and SETTINGS == False and MENU == False:
         meteors.append(Meteor(random.randint(0, screen_width - meteor_rect.width), y-meteor_rect.height, 5, rotated_meteor))
         last_meteor_spawn_time = time.time()
 
@@ -454,7 +458,7 @@ while True:
     angle=angle+1
     rotated_meteor = pygame.transform.rotate(METEOR, angle)
 
-    # COLLISIONS
+    ## COLLISIONS
     #LASER AND METEOR
     for meteor in meteors:
         meteor_rect = pygame.Rect(meteor.x, meteor.y, meteor.img.get_width(), meteor.img.get_height())
