@@ -72,6 +72,7 @@ text0 = font0.render("Meteor shooter", True, "grey50")
 gameplay_text0 = font1.render(f"Gameplay:  <-   {sets.gameplay}   -> ", True, "grey40")
 window_size_text0 = font1.render(f"Window size:  <-   {sets.window_size}   -> ", True, "grey40")
 YOU_LOST = font0.render("!!! YOU LOST !!!  (r) to enter Menu", True, "red")
+YOU_LOST2 = font0.render("!!! YOU LOST !!!  (r) to enter Menu", True, "red3")
 
 #OBJECT SETTINGS
 ship_rect = ship.get_rect(center = (screen_width/2, math.floor(screen_height/4*3.1)))
@@ -105,6 +106,7 @@ menu_was_true = False
 shoots = False
 last_reload = 0
 reload_time = 0.2
+redindex = 0
 
 class Meteor:
     def __init__(self, x, y, speed, img, angle = random.randint(0, 360)):
@@ -468,7 +470,16 @@ while True:
             STOP = True
     if STOP == True:
         screen.blit(GAME_OVER_scale, (0, 0))
-        screen.blit(YOU_LOST, (screen_width/2 - YOU_LOST.get_width()/2, screen_height/2 - YOU_LOST.get_height()/2))
+        
+        redindex = redindex + 1
+        if redindex >= 20:
+            screen.blit(YOU_LOST, (screen_width/2 - YOU_LOST.get_width()/2, screen_height/2 - YOU_LOST.get_height()/2))
+        else:
+            screen.blit(YOU_LOST2, (screen_width/2 - YOU_LOST.get_width()/2, screen_height/2 - YOU_LOST.get_height()/2))
+        if redindex == 40:
+            redindex = 0
+        
+        
     if MENU == True:
         meteors = []
 
