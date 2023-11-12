@@ -2,7 +2,7 @@ import pygame, sys
 import math
 import time
 import random
-
+from time import sleep as wait
 pygame.init()
 
 ###########################################################################
@@ -61,6 +61,8 @@ SETTINGS_butt = pygame.image.load("graphics/SETTINGS.png").convert_alpha()
 SETTINGS_butt_scale = pygame.transform.scale(SETTINGS_butt, (37*x,37*y))
 LASER = pygame.image.load("graphics/laser.png").convert_alpha()
 METEOR = pygame.image.load("graphics/meteor.png").convert_alpha()
+GAME_OVER = pygame.image.load("graphics/game_over.png").convert_alpha()
+GAME_OVER_scale = pygame.transform.scale(GAME_OVER, screenxy)
 
 #TEXT
 font_size = 50
@@ -69,6 +71,7 @@ font1 = pygame.font.Font("graphics/Oswald-Medium.ttf", font_size)
 text0 = font0.render("Meteor shooter", True, "grey50")
 gameplay_text0 = font1.render(f"Gameplay:  <-   {sets.gameplay}   -> ", True, "grey40")
 window_size_text0 = font1.render(f"Window size:  <-   {sets.window_size}   -> ", True, "grey40")
+YOU_LOST = font0.render("!!! YOU LOST !!!  (r) to enter Menu", True, "red")
 
 #OBJECT SETTINGS
 ship_rect = ship.get_rect(center = (screen_width/2, math.floor(screen_height/4*3.1)))
@@ -85,6 +88,7 @@ MENU_BOUNCE = False
 clock = pygame.time.Clock()
 MENU = True
 SETTINGS = False
+STOP = False
 move_up = False
 move_down = False
 move_left = False
@@ -150,6 +154,8 @@ def shoot():
 
 while True:
     time.time()
+    if MENU == True:
+        STOP = False
     
     #SCREEN SIZE CHANGING
     if index1 == 0:
@@ -195,13 +201,13 @@ while True:
             if exit_rect.x <= mouse[0] <= exit_rect.x + exit_rect.width and exit_rect.y <= mouse[1] <= exit_rect.y + exit_rect.height and MENU == True:
                 pygame.quit()
                 sys.exit()
-            if settings_rect.x <= mouse[0] <= settings_rect.x + settings_rect.width and settings_rect.y <= mouse[1] <= settings_rect.y + settings_rect.height and SETTINGS == False:
+            if settings_rect.x <= mouse[0] <= settings_rect.x + settings_rect.width and settings_rect.y <= mouse[1] <= settings_rect.y + settings_rect.height and SETTINGS == False and STOP == False:
                 if MENU == True: #if activated SETTINGS from MENU, after DEactivation go back to MENU
                     menu_was_true = True
                 SETTINGS = True
                 MENU = False
                 
-            elif SETTINGS == True and settings_rect.x <= mouse[0] <= settings_rect.x + settings_rect.width and settings_rect.y <= mouse[1] <= settings_rect.y + settings_rect.height:
+            elif SETTINGS == True and settings_rect.x <= mouse[0] <= settings_rect.x + settings_rect.width and settings_rect.y <= mouse[1] <= settings_rect.y + settings_rect.height and STOP == False:
                 SETTINGS = False
                 if menu_was_true: #same comment as above (line 155)
                     MENU = True
@@ -227,6 +233,7 @@ while True:
         if event.type == pygame.KEYDOWN and event.key == pygame.K_r and MENU == False:
             MENU = True
             SETTINGS = False
+            STOP = False
             print("r")
         if event.type == pygame.KEYDOWN and event.key == pygame.K_s and MENU == True:
             MENU = False
@@ -291,12 +298,12 @@ while True:
 
     
         # IF GAMEPLAY IS MOUSE, SHIP MOVES AS MOUSE MOVES
-        if event.type == pygame.MOUSEMOTION and MENU == False and SETTINGS == False and sets.gameplay == "Mouse":
+        if event.type == pygame.MOUSEMOTION and MENU == False and SETTINGS == False and sets.gameplay == "Mouse" and STOP == False:
             ship_rect.center = event.pos
         
         # ESCAPE FOR SETTINGS
         # made this so when you enter settings from menu, you will go back to menu after pressing it again
-        if event.type == pygame.KEYDOWN:
+        if event.type == pygame.KEYDOWN and STOP == False:
             if event.key == pygame.K_ESCAPE:
                 if SETTINGS == True:
                     SETTINGS = False
@@ -312,9 +319,10 @@ while True:
                     MENU = False
                 
 
-        # MOVEMENT CONTINUOS IF ARROW KEY PRESSED DOWN
-        if MENU == False and SETTINGS == False:
+        # MOVEMENT AND SHOOTING
+        if MENU == False and SETTINGS == False and STOP == False:
             keys = pygame.key.get_pressed()
+            
             if sets.gameplay == "Arrows/Space" or sets.gameplay == "WASD/Space" or sets.gameplay == "WASD/Mouse":
                 move_up = keys[pygame.K_UP] or keys[pygame.K_w]
                 move_down = keys[pygame.K_DOWN] or keys[pygame.K_s]
@@ -324,10 +332,12 @@ while True:
                 if keys[pygame.K_SPACE] and time.time() - last_reload > reload_time and sets.gameplay != "WASD/Mouse":
                     shoot()
                     last_reload = time.time()
+            
             if sets.gameplay == "Mouse" or sets.gameplay == "WASD/Mouse":
                 if pygame.mouse.get_pressed()[0] and time.time() - last_reload > reload_time:
                     shoot()
                     last_reload = time.time()
+            
             if sets.gameplay == "Mouse/Space":
                 ship_rect.center = pygame.mouse.get_pos()
                 if keys[pygame.K_SPACE] and time.time() - last_reload > reload_time:
@@ -361,9 +371,6 @@ while True:
     if move_right:
         ship_rect.x = ship_rect.x + 10
 
-
-
-        
     # GAMEPLAY OPTIONS (ignore this)
     if sets.gameplay not in sets.gameplay_options:
         print("Invalid gameplay option.")
@@ -400,7 +407,7 @@ while True:
         screen.blit(START_butt, (start_rect.x, start_rect.y))
         screen.blit(EXIT_butt, (exit_rect.x, exit_rect.y))
     # INGAME SHIP MOVEMENT
-    if MENU == False and SETTINGS == False:
+    if MENU == False and SETTINGS == False and STOP == False:
         screen.blit(ship, (ship_rect.x, ship_rect.y))
     # SETTINGS
     if SETTINGS == True:
@@ -410,7 +417,9 @@ while True:
         screen.blit(window_size_text0, (screen_width/3, screen_height/4*2))
         if settings_selected_index == 1 and settings_selected_any == True:
             pygame.draw.rect(screen, "grey", window_size_text0.get_rect(topleft = (screen_width/3-5*x, screen_height/4*2)), 3)
-        
+    
+
+    # SHIP BOUNDARIES
     if ship_rect.top < 0:
         ship_rect.top = 0
     if ship_rect.bottom > screen_height:
@@ -456,10 +465,12 @@ while True:
     for meteor in meteors:
         meteor_rect = pygame.Rect(meteor.x, meteor.y, meteor.img.get_width(), meteor.img.get_height())
         if meteor_rect.colliderect(ship_rect):
-            print("GAME OVER")
-            pygame.quit()
-            sys.exit()
-
+            STOP = True
+    if STOP == True:
+        screen.blit(GAME_OVER_scale, (0, 0))
+        screen.blit(YOU_LOST, (screen_width/2 - YOU_LOST.get_width()/2, screen_height/2 - YOU_LOST.get_height()/2))
+    if MENU == True:
+        meteors = []
 
 #x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#
         
