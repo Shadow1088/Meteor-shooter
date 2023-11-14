@@ -8,7 +8,7 @@ pygame.init()
 ###########################################################################
 ###########################################################################
 
-DIFFICULTY = 0.0 # 0%, 100% = 1.0 (1.0 = 1 second, so the meteors would spawn instantly..
+DIFFICULTY = 0.95 # 0%, 100% = 1.0 (1.0 = 1 second, so the meteors would spawn instantly..
 #                              honestly its insane, but the ship is too weak for it now)
 #                              CHANGE THIS HOW MUCH YOU WANT, BUT KEEP IN MIND IT MIGHT BE UNPLAYABLE
 
@@ -21,6 +21,8 @@ class Settings:
 
     gameplay_options = ["Arrows/Space", "Mouse", "Mouse/Space", "WASD/Space", "WASD/Mouse"]
     gameplay = "Mouse"
+
+    difficulty = DIFFICULTY
 sets = Settings()
 
 ###xxx###
@@ -77,6 +79,7 @@ gameplay_text0 = font1.render(f"Gameplay:  <-   {sets.gameplay}   -> ", True, "g
 window_size_text0 = font1.render(f"Window size:  <-   {sets.window_size}   -> ", True, "grey40")
 YOU_LOST = font0.render("!!! YOU LOST !!!  (r) to enter Menu", True, "red")
 YOU_LOST2 = font0.render("!!! YOU LOST !!!  (r) to enter Menu", True, "red3")
+difficulty0 = font1.render(f"Difficulty: {sets.difficulty} -> +5", True, "grey40")
 
 #OBJECT SETTINGS
 ship_rect = ship.get_rect(center = (screen_width/2, math.floor(screen_height/4*3.1)))
@@ -112,24 +115,40 @@ last_reload = 0
 reload_time = 0.2
 redindex = 0
 
+class Ship:
+    def __init__(self, x, y, img, dmg, angle):
+        self.x = ship_rect.x
+        self.y = ship_rect.y
+        self.img = img
+        self.dmg = dmg
+        self.angle = angle
+
+    def draw(self, screen):
+        screen.blit(self.img, (self.x, self.y))
+
+basic_ship = Ship(ship_rect.x, ship_rect.y, ship, 1, 0)
+
+
+rotation_meteor = random.randint(0, 360)
 class Meteor:
-    def __init__(self, x, y, speed, img, angle = random.randint(0, 360)):
+    def __init__(self, x, y, speed, img, angle=rotation_meteor):
         self.x = x
         self.y = y
         self.speed = speed
-        self.img = img
-        self.angle = angle
+        self.img = METEOR
+        
 
     def update(self):
         self.y += self.speed
 
     def draw(self, screen):
-        screen.blit(self.img, (self.x, self.y))
+        rotated_meteor = pygame.transform.rotate(self.img, rotation_meteor)
+        screen.blit(rotated_meteor, (self.x, self.y))
 
 meteors = []
 meteor_spawn_time = 1.0
 last_meteor_spawn_time = 0.0
-angle = 0
+
 
 class Laser:
     def __init__(self, x, y, direction, speed, img):
@@ -159,6 +178,7 @@ def shoot():
 
 
 while True:
+    rotation_meteor = random.randint(0, 360)
     time.time()
     if MENU == True:
         STOP = False
@@ -233,6 +253,15 @@ while True:
                     window_size_text0 = font1.render(f"Window size:  <-   {sets.window_size}   -> (unfinished)", True, "grey40")
                 else:
                     window_size_text0 = font1.render(f"Window size:  <-   {sets.window_size}   ->      (default)", True, "grey40")
+            if SETTINGS == True and screen_width/2-difficulty0.get_width() <= mouse[0] <= screen_width/2+difficulty0.get_width() and screen_height/4*3 <= mouse[1] <= screen_height/4*3+difficulty0.get_height():
+                DIFFICULTY = DIFFICULTY + 0.05
+                difficulty0 = font1.render(f"Difficulty: {sets.difficulty} -> +5", True, "grey40")
+                sets.difficulty = round(DIFFICULTY, 2)
+                DIFFICULTY = round(DIFFICULTY, 2)
+                if DIFFICULTY > 1.0 or sets.difficulty > 1.0:
+                    DIFFICULTY = 0.05
+                    sets.difficulty = 0.05
+
         
         # MENU KEYBOARD SHORTCUTS
 
@@ -423,6 +452,7 @@ while True:
         screen.blit(window_size_text0, (screen_width/3, screen_height/4*2))
         if settings_selected_index == 1 and settings_selected_any == True:
             pygame.draw.rect(screen, "grey", window_size_text0.get_rect(topleft = (screen_width/3-5*x, screen_height/4*2)), 3)
+        screen.blit(difficulty0, (screen_width/3, screen_height/4*3))
     
 
     # SHIP BOUNDARIES
@@ -448,15 +478,14 @@ while True:
             meteors.remove(meteor)
     # SPAWN METEORS
     if (time.time() - last_meteor_spawn_time)+DIFFICULTY > meteor_spawn_time and SETTINGS == False and MENU == False:
-        meteors.append(Meteor(random.randint(0, screen_width - meteor_rect.width), y-meteor_rect.height, 5, rotated_meteor))
+        meteors.append(Meteor(random.randint(0, screen_width - meteor_rect.width), y-meteor_rect.height, 5, rotation_meteor))
         last_meteor_spawn_time = time.time()
 
     # UPDATE AND DRAW METEORS
     for meteor in meteors:
         meteor.update()
         meteor.draw(screen)
-    angle=angle+1
-    rotated_meteor = pygame.transform.rotate(METEOR, angle)
+    
 
     ## COLLISIONS
     #LASER AND METEOR
@@ -467,11 +496,13 @@ while True:
             if meteor_rect.colliderect(lsr_rect): 
                 meteors.remove(meteor)
                 lasers.remove(lsr)  
+    
     #SHIP AND METEOR
     for meteor in meteors:
         meteor_rect = pygame.Rect(meteor.x, meteor.y, meteor.img.get_width(), meteor.img.get_height())
         if meteor_rect.colliderect(ship_rect):
             STOP = True
+
     if STOP == True:
         screen.blit(GAME_OVER_scale, (0, 0))
         
