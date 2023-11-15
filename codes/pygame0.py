@@ -8,6 +8,7 @@ pygame.init()
 ###########################################################################
 ###########################################################################
 
+start_time = time.time()
 DIFFICULTY = 0.95 # 0%, 100% = 1.0 (1.0 = 1 second, so the meteors would spawn instantly..
 #                              honestly its insane, but the ship is too weak for it now)
 #                              CHANGE THIS HOW MUCH YOU WANT, BUT KEEP IN MIND IT MIGHT BE UNPLAYABLE
@@ -81,6 +82,7 @@ YOU_LOST = font0.render("!!! YOU LOST !!!  (r) to enter Menu", True, "red")
 YOU_LOST2 = font0.render("!!! YOU LOST !!!  (r) to enter Menu", True, "red3")
 difficulty0 = font1.render(f"Difficulty: {sets.difficulty} -> +5", True, "grey40")
 
+
 #OBJECT SETTINGS
 ship_rect = ship.get_rect(center = (screen_width/2, math.floor(screen_height/4*3.1)))
 start_rect = START_butt.get_rect(center = (screen_width/2 - 200*x, screen_height/2 + 30*y))
@@ -114,6 +116,14 @@ shoots = False
 last_reload = 0
 reload_time = 0.2
 redindex = 0
+game = False
+start = 0
+start_has_run = False
+points = 0
+alive_points = 0
+add_points = 0
+last_points = 0
+highscore = 0
 
 class Ship:
     def __init__(self, x, y, img, dmg, angle):
@@ -144,6 +154,7 @@ class Meteor:
     def draw(self, screen):
         rotated_meteor = pygame.transform.rotate(self.img, rotation_meteor)
         screen.blit(rotated_meteor, (self.x, self.y))
+#basic_meteor = Meteor(random.randint(0, screen_width - meteor_rect.width), y-meteor_rect.height, 5, METEOR, rotation_meteor)
 
 meteors = []
 meteor_spawn_time = 1.0
@@ -171,6 +182,9 @@ lasers = []
 def shoot():
     lasers.append(Laser(ship_rect.centerx, ship_rect.top, -1, 10, LASER))
 
+
+point_memory = []
+
 #sizes
 #############################################################################################################################
 #############################################################################################################################
@@ -178,6 +192,39 @@ def shoot():
 
 
 while True:
+    
+    
+
+    # POINT MECHANISM
+    try: highscore = max(point_memory)
+    except: pass
+    points = add_points + alive_points
+    if MENU == False and SETTINGS == False and STOP == False and start_has_run == False:
+        start_time = time.time() # reset start_time when game restarts
+        last_points = points
+        start = 0
+        alive_points = 0
+        add_points = 0
+        start_has_run = True
+    elif MENU == False and SETTINGS == False and STOP == False and start_has_run == True:
+        start = time.time() - start_time
+        alive_points = int(round(start, 1) * 10) # calculate points based on time
+
+    else:
+        if start_has_run == True:
+            point_memory.append(points)
+            points = add_points + alive_points
+        start_has_run = False
+        
+    
+    # print(start, points, last_points)
+    # print(point_memory)
+
+    
+    
+    
+
+
     rotation_meteor = random.randint(0, 360)
     time.time()
     if MENU == True:
@@ -472,12 +519,14 @@ while True:
         if lsr.y < 0:
             lasers.remove(lsr)
 
-    ##  METEORS
+    # METEORS
     for meteor in meteors:
         if meteor.y > screen_height:
             meteors.remove(meteor)
+
     # SPAWN METEORS
     if (time.time() - last_meteor_spawn_time)+DIFFICULTY > meteor_spawn_time and SETTINGS == False and MENU == False:
+        #Current_meteor = random.choice()
         meteors.append(Meteor(random.randint(0, screen_width - meteor_rect.width), y-meteor_rect.height, 5, rotation_meteor))
         last_meteor_spawn_time = time.time()
 
@@ -495,7 +544,10 @@ while True:
             lsr_rect = pygame.Rect(lsr.x, lsr.y, lsr.img.get_width(), lsr.img.get_height())
             if meteor_rect.colliderect(lsr_rect): 
                 meteors.remove(meteor)
-                lasers.remove(lsr)  
+                lasers.remove(lsr)
+                if STOP != True:
+                    add_points = add_points + 5
+                
     
     #SHIP AND METEOR
     for meteor in meteors:
@@ -503,9 +555,11 @@ while True:
         if meteor_rect.colliderect(ship_rect):
             STOP = True
 
+    # GAME OVER
     if STOP == True:
         screen.blit(GAME_OVER_scale, (0, 0))
         
+        # GAME OVER TEXT
         redindex = redindex + 1
         if redindex >= 20:
             screen.blit(YOU_LOST, (screen_width/2 - YOU_LOST.get_width()/2, screen_height/2 - YOU_LOST.get_height()/2))
@@ -514,10 +568,18 @@ while True:
         if redindex == 40:
             redindex = 0
         
-        
+    # METEORS RESET
     if MENU == True:
         meteors = []
 
+    # POINTS
+    points0 = font1.render(f"Points: {points}", True, "grey40")
+    last_points0 = font1.render(f"Last points: {last_points}", True, "grey40")
+    highscore0 = font1.render(f"Highscore: {highscore}", True, "grey40")
+    if MENU == False and SETTINGS == False and STOP == False:
+        screen.blit(points0, (13,5))
+        screen.blit(last_points0, (13, points0.get_height()+5))
+        screen.blit(highscore0, (screen_width-highscore0.get_width()-SETTINGS_butt_scale.get_width()-50, 0))
 #x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#
         
 
