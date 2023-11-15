@@ -351,32 +351,48 @@ while True:
                 settings_selected_index = settings_selected_index - 1
             if settings_selected_index > 1:
                 settings_selected_index = 1
-            if settings_selected_index < 0:
-                settings_selected_index = 0
+            if settings_selected_index < -1:
+                settings_selected_index = -1
             if event.key == pygame.K_LEFT:
-                if settings_selected_index == 0:
+                if settings_selected_index == -1:
                     index0 = index0 - 1
                     sets.gameplay = sets.gameplay_options[index0]
                     gameplay_text0 = font1.render(f"Gameplay:  <-   {sets.gameplay}   -> ", True, "grey40")
-                if settings_selected_index == 1:
+                if settings_selected_index == 0:
                     index1 = index1 - 1
                     sets.window_size = sets.window_sizes[index1]
                     if sets.window_size != "Big":
                         window_size_text0 = font1.render(f"Window size:  <-   {sets.window_size}   -> (unfinished)", True, "grey40")
                     else:
-                        window_size_text0 = font1.render(f"Window size:  <-   {sets.window_size}   ->  (default)", True, "grey40")        
+                        window_size_text0 = font1.render(f"Window size:  <-   {sets.window_size}   ->  (default)", True, "grey40")
+                if settings_selected_index == 1:
+                    DIFFICULTY = DIFFICULTY - 0.05
+                    difficulty0 = font1.render(f"Difficulty: {sets.difficulty} -> +0.05", True, "grey40")
+                    sets.difficulty = round(DIFFICULTY, 2)
+                    DIFFICULTY = round(DIFFICULTY, 2)
+                    if DIFFICULTY < 0.05 or sets.difficulty < 0.05:
+                        DIFFICULTY = 1.0
+                        sets.difficulty = 1.0
             if event.key == pygame.K_RIGHT:
-                if settings_selected_index == 0:
+                if settings_selected_index == -1:
                     index0 = index0 + 1
                     sets.gameplay = sets.gameplay_options[index0]
                     gameplay_text0 = font1.render(f"Gameplay:  <-   {sets.gameplay}   -> ", True, "grey40")
-                if settings_selected_index == 1:
+                if settings_selected_index == 0:
                     index1 = index1 + 1
                     sets.window_size = sets.window_sizes[index1]
                     if sets.window_size != "Big":
                         window_size_text0 = font1.render(f"Window size:  <-   {sets.window_size}   -> (unfinished)", True, "grey40")
                     else:
                         window_size_text0 = font1.render(f"Window size:  <-   {sets.window_size}   ->  (default)", True, "grey40")
+                if settings_selected_index == 1:
+                    DIFFICULTY = DIFFICULTY + 0.05
+                    difficulty0 = font1.render(f"Difficulty: {sets.difficulty} -> +0.05", True, "grey40")
+                    sets.difficulty = round(DIFFICULTY, 2)
+                    DIFFICULTY = round(DIFFICULTY, 2)
+                    if DIFFICULTY > 1.0 or sets.difficulty > 1.0:
+                        DIFFICULTY = 0.05
+                        sets.difficulty = 0.05
 
     
         # IF GAMEPLAY IS MOUSE, SHIP MOVES AS MOUSE MOVES
@@ -437,11 +453,11 @@ while True:
                     move_right = False
         
 
-    # INDEX RESETING - so the index doesnt go out of range
+    # INDEX RESETING - so the settings choosing index doesnt go out of range
     if index0 == max_index0:
         index0 = -1
     if index1 == max_index1:
-        index1 = -1
+        index1 = -1 
 
     # MOVEMENT SPEED
     if move_up:
@@ -494,12 +510,14 @@ while True:
     # SETTINGS
     if SETTINGS == True:
         screen.blit(gameplay_text0, (screen_width/3, screen_height/4))
-        if settings_selected_index == 0 and settings_selected_any == True:
+        if settings_selected_index == -1 and settings_selected_any == True:
             pygame.draw.rect(screen, "grey", gameplay_text0.get_rect(topleft = (screen_width/3-5*x, screen_height/4)), 3)
         screen.blit(window_size_text0, (screen_width/3, screen_height/4*2))
-        if settings_selected_index == 1 and settings_selected_any == True:
+        if settings_selected_index == 0 and settings_selected_any == True:
             pygame.draw.rect(screen, "grey", window_size_text0.get_rect(topleft = (screen_width/3-5*x, screen_height/4*2)), 3)
         screen.blit(difficulty0, (screen_width/3, screen_height/4*3))
+        if settings_selected_index == 1 and settings_selected_any == True:
+            pygame.draw.rect(screen, "grey", difficulty0.get_rect(topleft = (screen_width/3-5*x, screen_height/4*3)), 3)
     
 
     # SHIP BOUNDARIES
