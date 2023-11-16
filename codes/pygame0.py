@@ -138,7 +138,7 @@ alive_points = 0
 add_points = 0
 last_points = 0
 highscore = 0
-#hp = 1
+last_point_check = 0
 
 class Ship:
     def __init__(self, x, y, img, dmg, angle):
@@ -703,8 +703,43 @@ while True:
         meteor.draw(screen)
     
 
-    # METEOR DESTROYING REWARDS
-    
+    # DIFFICUTLTY SCALING
+    if MENU == False and SETTINGS == False and STOP == False:
+        if math.floor(points/100) > last_point_check:
+            last_point_check = math.floor(points/100)
+            meteor_types_rate["basic"] = meteor_types_rate["basic"] - 10
+            meteor_types_rate["mid"] = meteor_types_rate["mid"] - 5
+            meteor_types_rate["speedy"] = meteor_types_rate["speedy"]
+            meteor_types_rate["good"] = meteor_types_rate["good"] + 2
+            meteor_types_rate["epic"] = meteor_types_rate["epic"] + 3
+            meteor_types_rate["huge"] = meteor_types_rate["huge"] +4
+            meteor_types_rate["legendary"] = meteor_types_rate["legendary"] + 10
+            meteor_types_rate["overpowered"] = meteor_types_rate["overpowered"] + 6
+            meteor_types_rate["alien"] = meteor_types_rate["alien"] + 7
+            meteor_types_rate["bloody"] = meteor_types_rate["bloody"] + 8
+            meteor_types_rate["the_rock"] = meteor_types_rate["the_rock"] + 9
+        if meteor_types_rate["basic"] < 40:
+            meteor_types_rate["basic"] = 120
+        if meteor_types_rate["mid"] < 80:
+            meteor_types_rate["mid"] = 150
+            
+
+        if STOP == True:
+            last_point_check = 0
+            meteor_types_rate = {
+                "basic": 10000,
+                "mid": 1000,
+                "speedy": 200,
+                "good": 100,
+                "epic": 50,
+                "huge": 10,
+                "legendary": 5,
+                "the_rock": 3,
+                "bloody": 2,
+                "overpowered": 1,
+                "alien": 1,
+            }
+
 
 
     ## COLLISIONS
