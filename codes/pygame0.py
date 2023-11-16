@@ -170,7 +170,7 @@ class Meteor:
         self.y += self.speed
 
     def draw(self, screen):
-        rotated_meteor = pygame.transform.rotate(self.img, rotation_meteor)
+        rotated_meteor = pygame.transform.rotate(self.img, angle=self.angle)
         screen.blit(rotated_meteor, (self.x, self.y))
 #basic_meteor = Meteor(random.randint(0, screen_width - meteor_rect.width), y-meteor_rect.height, 5, METEOR, rotation_meteor)
 class BasicMeteor(Meteor):
@@ -753,7 +753,7 @@ while True:
     if STOP == True:
         last_point_check = 0
         
-        meteor_types_rate["basic"] = 1000
+        meteor_types_rate["basic"] = 10000
         meteor_types_rate["mid"] = 1000
         meteor_types_rate["speedy"] = 200
         meteor_types_rate["good"] = 100
@@ -812,6 +812,7 @@ while True:
         meteor_rect = pygame.Rect(meteor.x, meteor.y, meteor.img.get_width(), meteor.img.get_height())
         if meteor_rect.colliderect(ship_rect):
             STOP = True
+        meteor.angle = meteor.angle + 1
 
     # GAME OVER
     if STOP == True:
