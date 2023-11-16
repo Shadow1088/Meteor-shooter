@@ -155,12 +155,13 @@ basic_ship = Ship(ship_rect.x, ship_rect.y, ship, 1, 0)
 
 rotation_meteor = random.randint(0, 360)
 class Meteor:
-    def __init__(self, x, y, speed, img, hp, angle=rotation_meteor):
+    def __init__(self, x, y, speed, img, hp, angle=None):
         self.x = x
         self.y = y
         self.speed = speed
         self.img = METEOR
         self.hp = hp
+        self.angle = random.randint(0, 360) if angle is None else angle
 
     def update(self):
         self.y += self.speed
@@ -219,7 +220,7 @@ class bloodyMeteor(Meteor):
         #self.hp = 25
         self.img = bloody_meteor
 class the_rockMeteor(Meteor):
-    def __init__(self, x, y, speed, img, hp, angle=None):
+    def __init__(self, x, y, speed, img, angle=None):
         super().__init__(x, y, speed, img, 18, angle)
         #self.hp = 30
         self.img = the_rock
@@ -622,7 +623,7 @@ while True:
     
     # SPAWN METEORS
     if (time.time() - last_meteor_spawn_time)+DIFFICULTY > meteor_spawn_time and SETTINGS == False and MENU == False:
-        current_meteor_rate_num = random.choice(range(0, sum_value))
+        current_meteor_rate_num = random.choice(range(0, sum_value+1))
         if current_meteor_rate_num in range(0, meteor_types_rate["basic"]):
             current_meteor = Meteor
         elif current_meteor_rate_num in range(meteor_types_rate["basic"], meteor_types_rate["mid"]+meteor_types_rate["basic"]):
@@ -646,7 +647,9 @@ while True:
         elif current_meteor_rate_num in range(meteor_types_rate["bloody"], meteor_types_rate["the_rock"]+1+meteor_types_rate["bloody"]):
             current_meteor = the_rockMeteor
         
-        
+        print(current_meteor_rate_num)
+        print(current_meteor)
+        print(sum_value)
         meteors.append(current_meteor(random.randint(0, screen_width - meteor_rect.width), y-meteor_rect.height, 5, rotation_meteor))
         last_meteor_spawn_time = time.time()
 
