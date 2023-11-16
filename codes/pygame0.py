@@ -703,6 +703,10 @@ while True:
         meteor.draw(screen)
     
 
+    # METEOR DESTROYING REWARDS
+    
+
+
     ## COLLISIONS
     #LASER AND METEOR
     for meteor in meteors:
@@ -710,10 +714,33 @@ while True:
         for lsr in lasers:
             lsr_rect = pygame.Rect(lsr.x, lsr.y, lsr.img.get_width(), lsr.img.get_height())
             if meteor_rect.colliderect(lsr_rect): 
-                if meteor.hp == 0:
+                if meteor.hp == 1:
+                    meteor.hp = meteor.hp - basic_ship.dmg
+                if meteor.hp <= 0:
                     meteors.remove(meteor)
                     lasers.remove(lsr)
-                    add_points = add_points + 5
+                    if meteor.img == METEOR:
+                        add_points = add_points + 5
+                    if meteor.img == meteor0:
+                        add_points = add_points + 10
+                    if meteor.img == meteor1:
+                        add_points = add_points + 15
+                    if meteor.img == blue_meteor:
+                        add_points = add_points + 20
+                    if meteor.img == purple_ease:
+                        add_points = add_points + 25
+                    if meteor.img == huge_meteor:
+                        add_points = add_points + 30
+                    if meteor.img == legendary_meteor:
+                        add_points = add_points + 35
+                    if meteor.img == overpowered_meteor:
+                        add_points = add_points + 50
+                    if meteor.img == alien_meteor:
+                        add_points = add_points + 5000
+                    if meteor.img == bloody_meteor:
+                        add_points = add_points + 45
+                    if meteor.img == the_rock:
+                        add_points = add_points + 50
                 else:
                     meteor.hp = meteor.hp - basic_ship.dmg
                     lasers.remove(lsr)
