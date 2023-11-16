@@ -21,7 +21,7 @@ class Settings:
     window_size = "Big"
 
     gameplay_options = ["Arrows/Space", "Mouse", "Mouse/Space", "WASD/Space", "WASD/Mouse"]
-    gameplay = "Mouse"
+    gameplay = "Mouse/Space"
 
     difficulty = DIFFICULTY
 sets = Settings()
@@ -70,6 +70,18 @@ LASER = pygame.image.load("graphics/laser.png").convert_alpha()
 METEOR = pygame.image.load("graphics/meteor.png").convert_alpha()
 GAME_OVER = pygame.image.load("graphics/game_over.png").convert_alpha()
 GAME_OVER_scale = pygame.transform.scale(GAME_OVER, screenxy)
+huge_meteor = pygame.image.load("graphics/huge_meteor.png").convert_alpha()
+legendary_meteor = pygame.image.load("graphics/legendary_meteor.png").convert_alpha()
+overpowered_meteor = pygame.image.load("graphics/overpowered.png").convert_alpha()
+alien_meteor = pygame.image.load("graphics/ufo.png").convert_alpha()
+bloody_meteor = pygame.image.load("graphics/bloody.png").convert_alpha()
+meteor0 = pygame.image.load("graphics/meteor0.png").convert_alpha()
+meteor1 = pygame.image.load("graphics/meteor1.png").convert_alpha()
+the_rock = pygame.image.load("graphics/the_rock.png").convert_alpha()
+purple_ease = pygame.image.load("graphics/purple_ease.png").convert_alpha()
+blue_meteor = pygame.image.load("graphics/blue_meteor.png").convert_alpha()
+red_meteor = pygame.image.load("graphics/red_meteor.png").convert_alpha()
+
 
 #TEXT
 font_size = 50
@@ -90,6 +102,8 @@ exit_rect = EXIT_butt.get_rect(center = (screen_width/2 + 200*x, screen_height/2
 settings_rect = SETTINGS_butt.get_rect(center = (screen_width - 50*x, 10*y))
 laser_rect = LASER.get_rect(midbottom = (ship_rect.centerx, ship_rect.top))
 meteor_rect = METEOR.get_rect(center = (screen_width/2, screen_height/2))
+huge_meteor = pygame.transform.scale(huge_meteor, (math.floor(huge_meteor.get_width()*x), math.floor(huge_meteor.get_height()*y)))
+huge_meteor_rect = huge_meteor.get_rect(center = (screen_width/2, screen_height/2))
 
 
 #OTHER
@@ -141,12 +155,12 @@ basic_ship = Ship(ship_rect.x, ship_rect.y, ship, 1, 0)
 
 rotation_meteor = random.randint(0, 360)
 class Meteor:
-    def __init__(self, x, y, speed, img, angle=rotation_meteor):
+    def __init__(self, x, y, speed, img, hp, angle=rotation_meteor):
         self.x = x
         self.y = y
         self.speed = speed
         self.img = METEOR
-        
+        self.hp = hp
 
     def update(self):
         self.y += self.speed
@@ -155,11 +169,79 @@ class Meteor:
         rotated_meteor = pygame.transform.rotate(self.img, rotation_meteor)
         screen.blit(rotated_meteor, (self.x, self.y))
 #basic_meteor = Meteor(random.randint(0, screen_width - meteor_rect.width), y-meteor_rect.height, 5, METEOR, rotation_meteor)
+class BasicMeteor(Meteor):
+    def __init__(self, x, y, speed, img, hp, angle=None):
+        super().__init__(x, y, speed, img,hp, angle)
+        self.hp = 1
+class MidMeteor(Meteor):
+    def __init__(self, x, y, speed, img, hp, angle=None):
+        super().__init__(x, y, speed, img, hp, angle)
+        self.hp = 2
+        self.img = meteor0
+class SpeedyMeteor(Meteor):
+    def __init__(self, x, y, speed, img, hp, angle=None):
+        super().__init__(x, y, speed, img, hp, angle)
+        self.hp = 1
+        self.speed = 10
+        self.img = blue_meteor
+class GoodMeteor(Meteor):
+    def __init__(self, x, y, speed, img, hp, angle=None):
+        super().__init__(x, y, speed, img, hp, angle)
+        self.hp = 3
+        self.img = meteor1
+class EpicMeteor(Meteor):
+    def __init__(self, x, y, speed, img, hp, angle=None):
+        super().__init__(x, y, speed, img, hp, angle)
+        self.hp = 5
+class HugeMeteor(Meteor):
+    def __init__(self, x, y, speed, img, hp, angle=None):
+        super().__init__(x, y, speed, img, hp, angle)
+        self.hp = 10
+        self.img = huge_meteor
+class LegendaryMeteor(Meteor):
+    def __init__(self, x, y, speed, img, hp, angle=None):
+        super().__init__(x, y, speed, img, hp, angle)
+        self.hp = 20
+        self.img = legendary_meteor
+class OverpoweredMeteor(Meteor):
+    def __init__(self, x, y, speed, img, hp, angle=None):
+        super().__init__(x, y, speed, img, hp, angle)
+        self.hp = 30
+        self.img = overpowered_meteor
+class AlienMeteor(Meteor):
+    def __init__(self, x, y, speed, img, hp, angle=None):
+        super().__init__(x, y, speed, img, hp, angle)
+        self.hp = 100000
+        self.img = alien_meteor
+class bloodyMeteor(Meteor):
+    def __init__(self, x, y, speed, img, hp, angle=None):
+        super().__init__(x, y, speed, img, hp, angle)
+        self.hp = 25
+        self.img = bloody_meteor
+class the_rockMeteor(Meteor):
+    def __init__(self, x, y, speed, img, hp, angle=None):
+        super().__init__(x, y, speed, img, hp, angle)
+        self.hp = 30
+        self.img = the_rock
+
+meteor_types_rate = {
+    "basic": 10000,
+    "mid": 1000,
+    "speedy": 200,
+    "good": 100,
+    "epic": 50,
+    "huge": 10,
+    "legendary": 5,
+    "the_rock": 3,
+    "bloody": 2,
+    "overpowered": 1,
+    "alien": 1,
+}
 
 meteors = []
 meteor_spawn_time = 1.0
 last_meteor_spawn_time = 0.0
-
+meteor_types = [BasicMeteor, MidMeteor, SpeedyMeteor, GoodMeteor, EpicMeteor, HugeMeteor, LegendaryMeteor, OverpoweredMeteor, AlienMeteor, bloodyMeteor, the_rockMeteor]
 
 class Laser:
     def __init__(self, x, y, direction, speed, img):
@@ -219,11 +301,6 @@ while True:
     
     # print(start, points, last_points)
     # print(point_memory)
-
-    
-    
-    
-
 
     rotation_meteor = random.randint(0, 360)
     time.time()
@@ -519,7 +596,6 @@ while True:
         if settings_selected_index == 1 and settings_selected_any == True:
             pygame.draw.rect(screen, "grey", difficulty0.get_rect(topleft = (screen_width/3-5*x, screen_height/4*3)), 3)
     
-
     # SHIP BOUNDARIES
     if ship_rect.top < 0:
         ship_rect.top = 0
@@ -542,10 +618,36 @@ while True:
         if meteor.y > screen_height:
             meteors.remove(meteor)
 
+    sum_value = sum(meteor_types_rate.values())
+    
     # SPAWN METEORS
     if (time.time() - last_meteor_spawn_time)+DIFFICULTY > meteor_spawn_time and SETTINGS == False and MENU == False:
-        #Current_meteor = random.choice()
-        meteors.append(Meteor(random.randint(0, screen_width - meteor_rect.width), y-meteor_rect.height, 5, rotation_meteor))
+        current_meteor_rate_num = random.choice(range(0, sum_value))
+        if current_meteor_rate_num in range(0, meteor_types_rate["basic"]):
+            current_meteor = Meteor
+        elif current_meteor_rate_num in range(meteor_types_rate["basic"], meteor_types_rate["mid"]):
+            current_meteor = MidMeteor
+        elif current_meteor_rate_num in range(meteor_types_rate["mid"], meteor_types_rate["speedy"]):
+            current_meteor = SpeedyMeteor
+        elif current_meteor_rate_num in range(meteor_types_rate["speedy"], meteor_types_rate["good"]):
+            current_meteor = GoodMeteor
+        elif current_meteor_rate_num in range(meteor_types_rate["good"], meteor_types_rate["epic"]):
+            current_meteor = EpicMeteor
+        elif current_meteor_rate_num in range(meteor_types_rate["epic"], meteor_types_rate["huge"]):
+            current_meteor = HugeMeteor
+        elif current_meteor_rate_num in range(meteor_types_rate["huge"], meteor_types_rate["legendary"]):
+            current_meteor = LegendaryMeteor
+        elif current_meteor_rate_num in range(meteor_types_rate["legendary"], meteor_types_rate["overpowered"]):
+            current_meteor = OverpoweredMeteor
+        elif current_meteor_rate_num in range(meteor_types_rate["overpowered"], meteor_types_rate["alien"]):
+            current_meteor = AlienMeteor
+        elif current_meteor_rate_num in range(meteor_types_rate["alien"], meteor_types_rate["bloody"]):
+            current_meteor = bloodyMeteor
+        elif current_meteor_rate_num in range(meteor_types_rate["bloody"], meteor_types_rate["the_rock"]):
+            current_meteor = the_rockMeteor
+        
+        
+        meteors.append(current_meteor(random.randint(0, screen_width - meteor_rect.width), y-meteor_rect.height, 5, current_meteor.hp, rotation_meteor))
         last_meteor_spawn_time = time.time()
 
     # UPDATE AND DRAW METEORS
