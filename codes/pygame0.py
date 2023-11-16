@@ -170,58 +170,58 @@ class Meteor:
         screen.blit(rotated_meteor, (self.x, self.y))
 #basic_meteor = Meteor(random.randint(0, screen_width - meteor_rect.width), y-meteor_rect.height, 5, METEOR, rotation_meteor)
 class BasicMeteor(Meteor):
-    def __init__(self, x, y, speed, img, hp, angle=None):
-        super().__init__(x, y, speed, img,hp, angle)
-        self.hp = 1
+    def __init__(self, x, y, speed, img, angle=None):
+        super().__init__(x, y, speed, img, 1, angle)
+        #self.hp = 1
 class MidMeteor(Meteor):
-    def __init__(self, x, y, speed, img, hp, angle=None):
-        super().__init__(x, y, speed, img, hp, angle)
-        self.hp = 2
+    def __init__(self, x, y, speed, img, angle=None):
+        super().__init__(x, y, speed, img, 2, angle)
+        #self.hp = 2
         self.img = meteor0
 class SpeedyMeteor(Meteor):
-    def __init__(self, x, y, speed, img, hp, angle=None):
-        super().__init__(x, y, speed, img, hp, angle)
-        self.hp = 1
+    def __init__(self, x, y, speed, img, angle=None):
+        super().__init__(x, y, speed, img, 1, angle)
+        #self.hp = 1
         self.speed = 10
         self.img = blue_meteor
 class GoodMeteor(Meteor):
-    def __init__(self, x, y, speed, img, hp, angle=None):
-        super().__init__(x, y, speed, img, hp, angle)
-        self.hp = 3
+    def __init__(self, x, y, speed, img, angle=None):
+        super().__init__(x, y, speed, img, 3, angle)
+        #self.hp = 3
         self.img = meteor1
 class EpicMeteor(Meteor):
-    def __init__(self, x, y, speed, img, hp, angle=None):
-        super().__init__(x, y, speed, img, hp, angle)
-        self.hp = 5
+    def __init__(self, x, y, speed, img, angle=None):
+        super().__init__(x, y, speed, img, 5, angle)
+        #self.hp = 5
 class HugeMeteor(Meteor):
-    def __init__(self, x, y, speed, img, hp, angle=None):
-        super().__init__(x, y, speed, img, hp, angle)
-        self.hp = 10
+    def __init__(self, x, y, speed, img, angle=None):
+        super().__init__(x, y, speed, img, 10, angle)
+        #self.hp = 10
         self.img = huge_meteor
 class LegendaryMeteor(Meteor):
-    def __init__(self, x, y, speed, img, hp, angle=None):
-        super().__init__(x, y, speed, img, hp, angle)
-        self.hp = 20
+    def __init__(self, x, y, speed, img, angle=None):
+        super().__init__(x, y, speed, img, 20, angle)
+        #self.hp = 20
         self.img = legendary_meteor
 class OverpoweredMeteor(Meteor):
-    def __init__(self, x, y, speed, img, hp, angle=None):
-        super().__init__(x, y, speed, img, hp, angle)
-        self.hp = 30
+    def __init__(self, x, y, speed, img, angle=None):
+        super().__init__(x, y, speed, img, 30, angle)
+        #self.hp = 30
         self.img = overpowered_meteor
 class AlienMeteor(Meteor):
-    def __init__(self, x, y, speed, img, hp, angle=None):
-        super().__init__(x, y, speed, img, hp, angle)
-        self.hp = 100000
+    def __init__(self, x, y, speed, img, angle=None):
+        super().__init__(x, y, speed, img, 10000, angle)
+        #self.hp = 100000
         self.img = alien_meteor
 class bloodyMeteor(Meteor):
-    def __init__(self, x, y, speed, img, hp, angle=None):
-        super().__init__(x, y, speed, img, hp, angle)
-        self.hp = 25
+    def __init__(self, x, y, speed, img, angle=None):
+        super().__init__(x, y, speed, img, 25, angle)
+        #self.hp = 25
         self.img = bloody_meteor
 class the_rockMeteor(Meteor):
     def __init__(self, x, y, speed, img, hp, angle=None):
-        super().__init__(x, y, speed, img, hp, angle)
-        self.hp = 30
+        super().__init__(x, y, speed, img, 18, angle)
+        #self.hp = 30
         self.img = the_rock
 
 meteor_types_rate = {
@@ -625,29 +625,29 @@ while True:
         current_meteor_rate_num = random.choice(range(0, sum_value))
         if current_meteor_rate_num in range(0, meteor_types_rate["basic"]):
             current_meteor = Meteor
-        elif current_meteor_rate_num in range(meteor_types_rate["basic"], meteor_types_rate["mid"]):
+        elif current_meteor_rate_num in range(meteor_types_rate["basic"], meteor_types_rate["mid"]+meteor_types_rate["basic"]):
             current_meteor = MidMeteor
-        elif current_meteor_rate_num in range(meteor_types_rate["mid"], meteor_types_rate["speedy"]):
+        elif current_meteor_rate_num in range(meteor_types_rate["mid"], meteor_types_rate["speedy"]+meteor_types_rate["mid"]):
             current_meteor = SpeedyMeteor
-        elif current_meteor_rate_num in range(meteor_types_rate["speedy"], meteor_types_rate["good"]):
+        elif current_meteor_rate_num in range(meteor_types_rate["speedy"], meteor_types_rate["good"]+meteor_types_rate["speedy"]):
             current_meteor = GoodMeteor
-        elif current_meteor_rate_num in range(meteor_types_rate["good"], meteor_types_rate["epic"]):
+        elif current_meteor_rate_num in range(meteor_types_rate["good"], meteor_types_rate["epic"]+meteor_types_rate["good"]):
             current_meteor = EpicMeteor
-        elif current_meteor_rate_num in range(meteor_types_rate["epic"], meteor_types_rate["huge"]):
+        elif current_meteor_rate_num in range(meteor_types_rate["epic"], meteor_types_rate["huge"]+meteor_types_rate["epic"]):
             current_meteor = HugeMeteor
-        elif current_meteor_rate_num in range(meteor_types_rate["huge"], meteor_types_rate["legendary"]):
+        elif current_meteor_rate_num in range(meteor_types_rate["huge"], meteor_types_rate["legendary"]+meteor_types_rate["huge"]):
             current_meteor = LegendaryMeteor
-        elif current_meteor_rate_num in range(meteor_types_rate["legendary"], meteor_types_rate["overpowered"]):
+        elif current_meteor_rate_num in range(meteor_types_rate["legendary"], meteor_types_rate["overpowered"]+meteor_types_rate["legendary"]):
             current_meteor = OverpoweredMeteor
-        elif current_meteor_rate_num in range(meteor_types_rate["overpowered"], meteor_types_rate["alien"]):
+        elif current_meteor_rate_num in range(meteor_types_rate["overpowered"], meteor_types_rate["alien"]+meteor_types_rate["overpowered"]):
             current_meteor = AlienMeteor
-        elif current_meteor_rate_num in range(meteor_types_rate["alien"], meteor_types_rate["bloody"]):
+        elif current_meteor_rate_num in range(meteor_types_rate["alien"], meteor_types_rate["bloody"]+meteor_types_rate["alien"]):
             current_meteor = bloodyMeteor
-        elif current_meteor_rate_num in range(meteor_types_rate["bloody"], meteor_types_rate["the_rock"]):
+        elif current_meteor_rate_num in range(meteor_types_rate["bloody"], meteor_types_rate["the_rock"]+1+meteor_types_rate["bloody"]):
             current_meteor = the_rockMeteor
         
         
-        meteors.append(current_meteor(random.randint(0, screen_width - meteor_rect.width), y-meteor_rect.height, 5, current_meteor.hp, rotation_meteor))
+        meteors.append(current_meteor(random.randint(0, screen_width - meteor_rect.width), y-meteor_rect.height, 5, rotation_meteor))
         last_meteor_spawn_time = time.time()
 
     # UPDATE AND DRAW METEORS
