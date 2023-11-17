@@ -172,7 +172,7 @@ class Meteor:
     def draw(self, screen):
         rotated_meteor = pygame.transform.rotate(self.img, angle=self.angle)
         screen.blit(rotated_meteor, (self.x, self.y))
-#basic_meteor = Meteor(random.randint(0, screen_width - meteor_rect.width), y-meteor_rect.height, 5, METEOR, rotation_meteor)
+
 class BasicMeteor(Meteor):
     def __init__(self, x, y, speed, img, hp, angle=None):
         super().__init__(x, y, speed, img, hp, angle=None)
@@ -631,9 +631,22 @@ while True:
         #MAIN SCREEN BUTTONS
         screen.blit(START_butt, (start_rect.x, start_rect.y))
         screen.blit(EXIT_butt, (exit_rect.x, exit_rect.y))
+    
+    # SHIP BOUNDARIES
+    if ship_rect.top < 0:
+        ship_rect.top = 0
+    if ship_rect.bottom > screen_height:
+        ship_rect.bottom = screen_height
+    if ship_rect.left < 0:
+        ship_rect.left = 0
+    if ship_rect.right > screen_width:
+        ship_rect.right = screen_width
+    
+    
     # INGAME SHIP MOVEMENT
     if MENU == False and SETTINGS == False and STOP == False:
         screen.blit(ship, (ship_rect.x, ship_rect.y))
+
     # SETTINGS
     if SETTINGS == True:
         screen.blit(gameplay_text0, (screen_width/3, screen_height/4))
@@ -645,16 +658,6 @@ while True:
         screen.blit(difficulty0, (screen_width/3, screen_height/4*3))
         if settings_selected_index == 1 and settings_selected_any == True:
             pygame.draw.rect(screen, "grey", difficulty0.get_rect(topleft = (screen_width/3-5*x, screen_height/4*3)), 3)
-    
-    # SHIP BOUNDARIES
-    if ship_rect.top < 0:
-        ship_rect.top = 0
-    if ship_rect.bottom > screen_height:
-        ship_rect.bottom = screen_height
-    if ship_rect.left < 0:
-        ship_rect.left = 0
-    if ship_rect.right > screen_width:
-        ship_rect.right = screen_width
 
     # LASERS
     for lsr in lasers:
@@ -727,8 +730,6 @@ while True:
         meteor.update()
         meteor.draw(screen)
         
-    
-
     # DIFFICUTLTY SCALING
     if MENU == False and SETTINGS == False and STOP == False:
         if math.floor(points/100) > last_point_check:
@@ -750,6 +751,7 @@ while True:
             meteor_types_rate["mid"] = 150
             
 
+    # AFTER GAME OVER METEOR TYPE RATES RESET
     if STOP == True:
         last_point_check = 0
         
@@ -766,9 +768,7 @@ while True:
         meteor_types_rate["the_rock"] = 1
     print(meteor_types_rate["bloody"])
 
-
-
-    ## COLLISIONS
+    ### COLLISIONS
     #LASER AND METEOR
     for meteor in meteors:
         meteor_rect = pygame.Rect(meteor.x, meteor.y, meteor.img.get_width(), meteor.img.get_height())
