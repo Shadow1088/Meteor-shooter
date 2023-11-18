@@ -81,6 +81,11 @@ the_rock = pygame.image.load("graphics/the_rock.png").convert_alpha()
 purple_ease = pygame.image.load("graphics/purple_ease.png").convert_alpha()
 blue_meteor = pygame.image.load("graphics/blue_meteor.png").convert_alpha()
 red_meteor = pygame.image.load("graphics/red_meteor.png").convert_alpha()
+light_blue_laser = pygame.image.load("graphics/light_blue_laser.png").convert_alpha()
+white_laser = pygame.image.load("graphics/white_laser.png").convert_alpha()
+yellow_laser = pygame.image.load("graphics/yellow_laser.png").convert_alpha()
+purple_laser = pygame.image.load("graphics/purple_laser.png").convert_alpha()
+multi_laser = pygame.image.load("graphics/multi_laser.png").convert_alpha()
 
 
 #TEXT
@@ -128,7 +133,7 @@ win_changed = False
 menu_was_true = False
 shoots = False
 last_reload = 0
-reload_time = 0.2
+reload_time = 0.2                  
 redindex = 0
 game = False
 start = 0
@@ -139,6 +144,7 @@ add_points = 0
 last_points = 0
 highscore = 0
 last_point_check = 0
+current_stage = "better good"
 
 class Ship:
     def __init__(self, x, y, img, dmg, angle):
@@ -294,27 +300,154 @@ last_meteor_spawn_time = 0.0
 meteor_types = [BasicMeteor, MidMeteor, SpeedyMeteor, GoodMeteor, EpicMeteor, HugeMeteor, LegendaryMeteor, OverpoweredMeteor, AlienMeteor, bloodyMeteor, the_rockMeteor]
 
 class Laser:
-    def __init__(self, x, y, direction, speed, img):
+    def __init__(self, x, y, direction, speed, img, dmg, angle=0):
         self.x = x
         self.y = y
         self.direction = direction
         self.speed = speed
         self.img = img
+        self.dmg = dmg
+        self.angle = math.radians(angle)
 
     def lsr_update(self):
         if self.direction == -1:
             self.y -= self.speed
-
+        else:
+            self.x += self.speed * math.cos(self.angle)
+            self.y += self.speed * math.sin(self.angle)
     def draw(self, screen):
         screen.blit(self.img, (self.x-5, self.y-5))
 
 
-basic_lsr = Laser(ship_rect.midtop, ship_rect.top+5, -1, 10, LASER)
+basic_lsr = (ship_rect.midtop, ship_rect.top+5, -1, 10, LASER)
 lasers = []
+
+def modif_blt_speed(speed):
+    for meteor in meteors:
+        meteor.speed = speed
+def modif_blt_dmg(dmg):
+    for laser in lasers:
+        laser.dmg = dmg
+def modif_blt_reload(reload):
+    reload_time = reload
+def dur_check():
+    for laser in lasers:
+        if laser.dmg == 2:
+            laser.img = yellow_laser
+        elif laser.dmg == 3:
+            laser.img = white_laser
+        elif laser.dmg == 4:
+            laser.img = light_blue_laser
+        elif laser.dmg == 5:
+            laser.img = purple_laser
+        elif laser.dmg > 5:
+            laser.img = multi_laser
+
+
 def shoot():
-    lasers.append(Laser(ship_rect.centerx, ship_rect.top, -1, 10, LASER))
+    if current_stage == "stock":
+        lasers.append(Laser(ship_rect.centerx, ship_rect.top, -1, 10, LASER, 1))
+    elif current_stage == "basic":
+        lasers.append(Laser(ship_rect.centerx-30, ship_rect.top-20, -1, 10, LASER, 1))
+        lasers.append(Laser(ship_rect.centerx+30, ship_rect.top-20, -1, 10, LASER, 1))
+    elif current_stage == "middle":
+        lasers.append(Laser(ship_rect.centerx, ship_rect.top-15, -1, 10, LASER, 1))
+        lasers.append(Laser(ship_rect.centerx-20, ship_rect.top, -1, 10, LASER, 1))
+        lasers.append(Laser(ship_rect.centerx+20, ship_rect.top, -1, 10, LASER, 1))
+    elif current_stage == "better":
+        lasers.append(Laser(ship_rect.centerx-40, ship_rect.top, -1, 10, LASER, 1))
+        lasers.append(Laser(ship_rect.centerx+40, ship_rect.top, -1, 10, LASER, 1))
+        lasers.append(Laser(ship_rect.centerx-20, ship_rect.top-20, -1, 10, LASER, 1))
+        lasers.append(Laser(ship_rect.centerx+20, ship_rect.top-20, -1, 10, LASER, 1))
+    elif current_stage == "way better":
+        lasers.append(Laser(ship_rect.centerx-40, ship_rect.top, +3, 10, LASER, 1, -100))
+        lasers.append(Laser(ship_rect.centerx+40, ship_rect.top, -3, 10, LASER, 1, -80))
+        lasers.append(Laser(ship_rect.centerx-20, ship_rect.top-20, +2, 10, LASER, 1, -95))
+        lasers.append(Laser(ship_rect.centerx+20, ship_rect.top-20, -2, 10, LASER, 1, -85))
+        lasers.append(Laser(ship_rect.centerx, ship_rect.top-40, -1, 10, LASER, 1))
+    elif current_stage == "good":
+        lasers.append(Laser(ship_rect.centerx-60, ship_rect.top, +3, 10, LASER, 1, -100))
+        lasers.append(Laser(ship_rect.centerx+60, ship_rect.top, -3, 10, LASER, 1, -80))
+        lasers.append(Laser(ship_rect.centerx-40, ship_rect.top-20, +2, 10, LASER, 1, -95))
+        lasers.append(Laser(ship_rect.centerx+40, ship_rect.top-20, -2, 10, LASER, 1, -85))
+        lasers.append(Laser(ship_rect.centerx-20, ship_rect.top-40, +1, 10, LASER, 1, -90))
+        lasers.append(Laser(ship_rect.centerx+20, ship_rect.top-40, -1, 10, LASER, 1, -90))
+    elif current_stage == "better good":
+        lasers.append(Laser(ship_rect.centerx-80, ship_rect.top, +3, 10, LASER, 1, -100))
+        lasers.append(Laser(ship_rect.centerx+80, ship_rect.top, -3, 10, LASER, 1, -80))
+        lasers.append(Laser(ship_rect.centerx-60, ship_rect.top-20, +2, 10, LASER, 1, -95))
+        lasers.append(Laser(ship_rect.centerx+60, ship_rect.top-20, -2, 10, LASER, 1, -85))
+        lasers.append(Laser(ship_rect.centerx-40, ship_rect.top-40, +1, 10, LASER, 1, -90))
+        lasers.append(Laser(ship_rect.centerx+40, ship_rect.top-40, +1, 10, LASER, 1, -90))
+        lasers.append(Laser(ship_rect.centerx-20, ship_rect.top-60, +1, 10, LASER, 1, -90))
+        lasers.append(Laser(ship_rect.centerx+20, ship_rect.top-60, -1, 10, LASER, 1, -90))
+    elif current_stage == "better better good":
+        lasers.append(Laser(ship_rect.centerx-80, ship_rect.top, +3, 10, LASER, 1, -100))
+        lasers.append(Laser(ship_rect.centerx+80, ship_rect.top, -3, 10, LASER, 1, -80))
+        lasers.append(Laser(ship_rect.centerx-60, ship_rect.top-20, +2, 10, LASER, 1, -95))
+        lasers.append(Laser(ship_rect.centerx+60, ship_rect.top-20, -2, 10, LASER, 1, -85))
+        lasers.append(Laser(ship_rect.centerx-40, ship_rect.top-40, +1, 10, LASER, 1, -92.5))
+        lasers.append(Laser(ship_rect.centerx+40, ship_rect.top-40, +1, 10, LASER, 1, -87.5))
+        lasers.append(Laser(ship_rect.centerx-28, ship_rect.top-60, +1, 10, LASER, 1, -90))
+        lasers.append(Laser(ship_rect.centerx+28, ship_rect.top-60, -1, 10, LASER, 1, -90))
+        lasers.append(Laser(ship_rect.centerx, ship_rect.top-80, -1, 10, LASER, 1))
+    elif current_stage == "better better better good":
+        lasers.append(Laser(ship_rect.centerx-80, ship_rect.top, +3, 10, LASER, 1, -100))
+        lasers.append(Laser(ship_rect.centerx+80, ship_rect.top, -3, 10, LASER, 1, -80))
+        lasers.append(Laser(ship_rect.centerx-60, ship_rect.top-20, +2, 10, LASER, 1, -95))
+        lasers.append(Laser(ship_rect.centerx+60, ship_rect.top-20, -2, 10, LASER, 1, -85))
+        lasers.append(Laser(ship_rect.centerx-40, ship_rect.top-40, +1, 10, LASER, 1, -92.5))
+        lasers.append(Laser(ship_rect.centerx+40, ship_rect.top-40, +1, 10, LASER, 1, -87.5))
+        lasers.append(Laser(ship_rect.centerx-28, ship_rect.top-60, +1, 10, LASER, 1, -90))
+        lasers.append(Laser(ship_rect.centerx+28, ship_rect.top-60, -1, 10, LASER, 1, -90))
+        lasers.append(Laser(ship_rect.centerx-14, ship_rect.top-80, +1, 10, LASER, 1, -90))
+        lasers.append(Laser(ship_rect.centerx+14, ship_rect.top-80, -1, 10, LASER, 1, -90))
+        lasers.append(Laser(ship_rect.centerx, ship_rect.top-100, -1, 10, LASER, 1))
+    elif current_stage == "great":
+        lasers.append(Laser(ship_rect.centerx-100, ship_rect.top, +3, 10, LASER, 1, -100))
+        lasers.append(Laser(ship_rect.centerx+100, ship_rect.top, -3, 10, LASER, 1, -80))
+        lasers.append(Laser(ship_rect.centerx-80, ship_rect.top-20, +2, 10, LASER, 1, -95))
+        lasers.append(Laser(ship_rect.centerx+80, ship_rect.top-20, -2, 10, LASER, 1, -85))
+        lasers.append(Laser(ship_rect.centerx-60, ship_rect.top-40, +1, 10, LASER, 1, -92.5))
+        lasers.append(Laser(ship_rect.centerx+60, ship_rect.top-40, +1, 10, LASER, 1, -87.5))
+        lasers.append(Laser(ship_rect.centerx-40, ship_rect.top-60, +1, 10, LASER, 1, -90))
+        lasers.append(Laser(ship_rect.centerx+40, ship_rect.top-60, -1, 10, LASER, 1, -90))
+        lasers.append(Laser(ship_rect.centerx-20, ship_rect.top-80, +1, 10, LASER, 1, -90))
+        lasers.append(Laser(ship_rect.centerx+20, ship_rect.top-80, -1, 10, LASER, 1, -90))
+        lasers.append(Laser(ship_rect.centerx-14, ship_rect.top-80, +1, 10, LASER, 1, -90))
+        lasers.append(Laser(ship_rect.centerx+14, ship_rect.top-80, -1, 10, LASER, 1, -90))
+        lasers.append(Laser(ship_rect.centerx, ship_rect.top-100, -1, 10, LASER, 1))
+    elif current_stage == "perfect":
+        lasers.append(Laser(ship_rect.centerx-100, ship_rect.top, +3, 10, LASER, 1, -100))
+        lasers.append(Laser(ship_rect.centerx+100, ship_rect.top, -3, 10, LASER, 1, -80))
+        lasers.append(Laser(ship_rect.centerx-80, ship_rect.top-20, +2, 10, LASER, 1, -95))
+        lasers.append(Laser(ship_rect.centerx+80, ship_rect.top-20, -2, 10, LASER, 1, -85))
+        lasers.append(Laser(ship_rect.centerx-60, ship_rect.top-40, +1, 10, LASER, 1, -92.5))
+        lasers.append(Laser(ship_rect.centerx+60, ship_rect.top-40, +1, 10, LASER, 1, -87.5))
+        lasers.append(Laser(ship_rect.centerx-40, ship_rect.top-60, +1, 10, LASER, 1, -90))
+        lasers.append(Laser(ship_rect.centerx+40, ship_rect.top-60, -1, 10, LASER, 1, -90))
+        lasers.append(Laser(ship_rect.centerx-20, ship_rect.top-80, +1, 10, LASER, 1, -90))
+        lasers.append(Laser(ship_rect.centerx+20, ship_rect.top-80, -1, 10, LASER, 1, -90))
+        lasers.append(Laser(ship_rect.centerx-10, ship_rect.top-100, +1, 10, LASER, 1, -90))
+        lasers.append(Laser(ship_rect.centerx+10, ship_rect.top-100, -1, 10, LASER, 1, -90))
+        lasers.append(Laser(ship_rect.centerx, ship_rect.top-120, -1, 10, LASER, 1))
 
 
+upgrade_stages = {
+    "stock": 0,
+    "basic": 1,
+    "middle": 2,
+    "better": 3,
+    "way better": 4,
+    "good": 5,
+    "better good": 6,
+    "better better good": 7,
+    "better better better good": 8,
+    "great": 9,
+    "perfect": 10,
+
+}
+# current_stage = sorted(upgrade_stages.keys())[-1]
 point_memory = []
 
 #sizes
@@ -324,7 +457,9 @@ point_memory = []
 
 
 while True:
-    
+    if MENU == False and SETTINGS == False and STOP == False:
+        if sets.gameplay == "Mouse/Space" or sets.gameplay == "Mouse":
+            pygame.mouse.set_visible(False)        
     
 
     # POINT MECHANISM
@@ -660,6 +795,7 @@ while True:
             pygame.draw.rect(screen, "grey", difficulty0.get_rect(topleft = (screen_width/3-5*x, screen_height/4*3)), 3)
 
     # LASERS
+    dur_check()
     for lsr in lasers:
         lsr.draw(screen)
         lsr.lsr_update()
@@ -678,51 +814,41 @@ while True:
         
         current_meteor_rate_num = random.choice(range(0, sum_value+1))
         if current_meteor_rate_num in range(0, meteor_types_rate["basic"]):
-            current_meteor = Meteor
-            hp = 1
-            speed = 5
+            current_meteor = Meteor; hp = 1; speed = 5
+    
         elif current_meteor_rate_num in range(meteor_types_rate["basic"], meteor_types_rate["mid"]+meteor_types_rate["basic"]):
-            current_meteor = MidMeteor
-            hp = 2
-            speed = 5
+            current_meteor = MidMeteor; hp = 2; speed = 5
+
         elif current_meteor_rate_num in range(meteor_types_rate["mid"], meteor_types_rate["speedy"]+meteor_types_rate["mid"]):
-            current_meteor = SpeedyMeteor
-            hp = 1
-            speed = 10
+            current_meteor = SpeedyMeteor; hp = 1; speed = 10
+           
         elif current_meteor_rate_num in range(meteor_types_rate["speedy"], meteor_types_rate["good"]+meteor_types_rate["speedy"]):
-            current_meteor = GoodMeteor
-            hp = 3
-            speed = 5
+            current_meteor = GoodMeteor; hp = 3; speed = 5
+          
         elif current_meteor_rate_num in range(meteor_types_rate["good"], meteor_types_rate["epic"]+meteor_types_rate["good"]):
-            current_meteor = EpicMeteor
-            hp = 6
-            speed = 5
+            current_meteor = EpicMeteor; hp = 6; speed = 5
+  
         elif current_meteor_rate_num in range(meteor_types_rate["epic"], meteor_types_rate["huge"]+meteor_types_rate["epic"]):
-            current_meteor = HugeMeteor
-            hp = 8
-            speed = 5
+            current_meteor = HugeMeteor; hp = 8; speed = 5
+            
         elif current_meteor_rate_num in range(meteor_types_rate["huge"], meteor_types_rate["legendary"]+meteor_types_rate["huge"]):
-            current_meteor = LegendaryMeteor
-            hp = 10
-            speed = 5
+            current_meteor = LegendaryMeteor; hp = 10; speed = 5
+            
         elif current_meteor_rate_num in range(meteor_types_rate["legendary"], meteor_types_rate["overpowered"]+meteor_types_rate["legendary"]):
-            current_meteor = OverpoweredMeteor
-            hp = 30
-            speed = 5
+            current_meteor = OverpoweredMeteor; hp = 30; speed = 5
+            
         elif current_meteor_rate_num in range(meteor_types_rate["overpowered"], meteor_types_rate["alien"]+meteor_types_rate["overpowered"]):
-            current_meteor = AlienMeteor
-            hp = 10000
-            speed = 5
+            current_meteor = AlienMeteor; hp = 10000; speed = 5
+         
         elif current_meteor_rate_num in range(meteor_types_rate["alien"], meteor_types_rate["bloody"]+meteor_types_rate["alien"]):
-            current_meteor = bloodyMeteor
-            hp = 25
-            speed = 5
+            current_meteor = bloodyMeteor; hp = 25; speed = 5
+          
         elif current_meteor_rate_num in range(meteor_types_rate["bloody"], meteor_types_rate["the_rock"]+1+meteor_types_rate["bloody"]):
-            current_meteor = the_rockMeteor
-            hp = 15
-            speed = 5
+            current_meteor = the_rockMeteor; hp = 15; speed = 5
+          
         
-        meteors.append(current_meteor(random.randint(0, screen_width - meteor_rect.width), y-meteor_rect.height-300, speed, rotation_meteor, hp))
+        meteors.append(current_meteor(random.randint(0, screen_width - meteor_rect.width), y-meteor_rect.height-300, #spawns above screen
+                                       speed, rotation_meteor, hp))
         last_meteor_spawn_time = time.time()
 
     # UPDATE AND DRAW METEORS
@@ -757,7 +883,7 @@ while True:
         
         meteor_types_rate["basic"] = 10000
         meteor_types_rate["mid"] = 1000
-        meteor_types_rate["speedy"] = 200
+        meteor_types_rate["speedy"] = 600
         meteor_types_rate["good"] = 100
         meteor_types_rate["epic"] = 50
         meteor_types_rate["huge"] = 10
@@ -766,7 +892,7 @@ while True:
         meteor_types_rate["alien"] = 2
         meteor_types_rate["bloody"] = 1
         meteor_types_rate["the_rock"] = 1
-    print(meteor_types_rate["bloody"])
+    print(meteor_types_rate["alien"])
 
     ### COLLISIONS
     #LASER AND METEOR
@@ -778,7 +904,8 @@ while True:
                 if meteor.hp == 1:
                     meteor.hp = meteor.hp - basic_ship.dmg
                 if meteor.hp <= 0:
-                    meteors.remove(meteor)
+                    try: meteors.remove(meteor)
+                    except: pass
                     lasers.remove(lsr)
                     if meteor.img == METEOR:
                         add_points = add_points + 5
@@ -791,7 +918,7 @@ while True:
                     if meteor.img == purple_ease:
                         add_points = add_points + 25
                     if meteor.img == huge_meteor:
-                        add_points = add_points + 30
+                        add_points = add_points + 30 
                     if meteor.img == legendary_meteor:
                         add_points = add_points + 35
                     if meteor.img == overpowered_meteor:
@@ -839,6 +966,8 @@ while True:
         screen.blit(points0, (13,5))
         screen.blit(last_points0, (13, points0.get_height()+5))
         screen.blit(highscore0, (screen_width-highscore0.get_width()-SETTINGS_butt_scale.get_width()-50, 0))
+
+    
 #x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#
         
 
