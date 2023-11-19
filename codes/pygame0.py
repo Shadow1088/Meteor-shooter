@@ -693,7 +693,7 @@ while True:
                         sets.difficulty = 0.05
                     difficulty0 = font1.render(f"Difficulty: {sets.difficulty} -> +0.05", True, "grey40")
 
-        print(DIFFICULTY, sets.difficulty)
+        
         # IF GAMEPLAY IS MOUSE, SHIP MOVES AS MOUSE MOVES
         if event.type == pygame.MOUSEMOTION and MENU == False and SETTINGS == False and sets.gameplay == "Mouse" and STOP == False:
             ship_rect.center = event.pos
@@ -1027,6 +1027,7 @@ while True:
                     imm = True
                     blt_speed_activation_time = time.time()
                     print("blt_speed")
+                    xx = "nothing"
                 if xx == "blt_speed2":
                     add_blt_speed(10)
                     add_blt_reload(-0.15)
@@ -1038,19 +1039,24 @@ while True:
                     the_blt_dmg = the_blt_dmg + 1
                     add_blt_dmg01 = True
                     show_blt_01 = time.time()
+                    xx = "nothing"
                 if xx == "blt_dmg2":
                     # add_blt_dmg(2)
                     add_blt_dmg02 = True
                     blt_dmg2_activation_time = time.time()
                     print("dmg2")
+                    xx = "nothing"
                 if xx == "immortality":
                     immortality = True
                     immortality_time = time.time()
                     imm = True
                     print("immortality")
+                    xx = "nothing"
                 if xx == "stageup":
                     current_stage = upgrade_stages[stage_selected_index+1]
-            
+                    stage_selected_index = stage_selected_index + 1
+                    xx = "nothing"
+
             if chest.y > screen_height:
                 chests.remove(chest)
                 chest_picked_up = False
@@ -1065,7 +1071,8 @@ while True:
         if blt_speed2_activation_time + 3 < time.time() and add_blt_sp2 == True:
             imm = False
 
-        if immortality == True:
+        
+        if immortality == True and xx != "nothing":
             imm = True
 
 
@@ -1167,6 +1174,7 @@ while True:
         blt_dmg2_activation_time = 0
         immortality_time = 0
         last_chest_spawn = 0
+        
 
     if STOP != True and blit_deact == True:
         try: screen.blit(deactivated_effect, (round(screen_width/2-deactivated_effect.get_width()/2), 50))
