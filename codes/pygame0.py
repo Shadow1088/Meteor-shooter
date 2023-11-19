@@ -492,7 +492,8 @@ point_memory = []
 while True:
     if MENU == False and SETTINGS == False and STOP == False:
         if sets.gameplay == "Mouse/Space" or sets.gameplay == "Mouse":
-            pygame.mouse.set_visible(False)        
+            pygame.mouse.set_visible(False) 
+    else: pygame.mouse.set_visible(True)       
     
 
     # POINT MECHANISM
