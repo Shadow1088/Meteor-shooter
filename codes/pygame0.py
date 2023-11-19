@@ -600,12 +600,12 @@ while True:
                     window_size_text0 = font1.render(f"Window size:  <-   {sets.window_size}   ->      (default)", True, "grey40")
             if SETTINGS == True and screen_width/2-difficulty0.get_width() <= mouse[0] <= screen_width/2+difficulty0.get_width() and screen_height/4*3 <= mouse[1] <= screen_height/4*3+difficulty0.get_height():
                 DIFFICULTY = DIFFICULTY + 0.05
-                difficulty0 = font1.render(f"Difficulty: {sets.difficulty} -> +0.05", True, "grey40")
                 sets.difficulty = round(DIFFICULTY, 2)
                 DIFFICULTY = round(DIFFICULTY, 2)
                 if DIFFICULTY > 1.0 or sets.difficulty > 1.0:
                     DIFFICULTY = 0.05
                     sets.difficulty = 0.05
+                difficulty0 = font1.render(f"Difficulty: {sets.difficulty} -> +0.05", True, "grey40")
 
         
         # MENU KEYBOARD SHORTCUTS
@@ -665,12 +665,12 @@ while True:
                         window_size_text0 = font1.render(f"Window size:  <-   {sets.window_size}   ->  (default)", True, "grey40")
                 if settings_selected_index == 1:
                     DIFFICULTY = DIFFICULTY - 0.05
-                    difficulty0 = font1.render(f"Difficulty: {sets.difficulty} -> +0.05", True, "grey40")
                     sets.difficulty = round(DIFFICULTY, 2)
                     DIFFICULTY = round(DIFFICULTY, 2)
                     if DIFFICULTY < 0.05 or sets.difficulty < 0.05:
                         DIFFICULTY = 1.0
                         sets.difficulty = 1.0
+                    difficulty0 = font1.render(f"Difficulty: {sets.difficulty} -> +0.05", True, "grey40")
             if event.key == pygame.K_RIGHT:
                 if settings_selected_index == -1:
                     index0 = index0 + 1
@@ -685,14 +685,14 @@ while True:
                         window_size_text0 = font1.render(f"Window size:  <-   {sets.window_size}   ->  (default)", True, "grey40")
                 if settings_selected_index == 1:
                     DIFFICULTY = DIFFICULTY + 0.05
-                    difficulty0 = font1.render(f"Difficulty: {sets.difficulty} -> +0.05", True, "grey40")
                     sets.difficulty = round(DIFFICULTY, 2)
                     DIFFICULTY = round(DIFFICULTY, 2)
                     if DIFFICULTY > 1.0 or sets.difficulty > 1.0:
                         DIFFICULTY = 0.05
                         sets.difficulty = 0.05
+                    difficulty0 = font1.render(f"Difficulty: {sets.difficulty} -> +0.05", True, "grey40")
 
-    
+        print(DIFFICULTY, sets.difficulty)
         # IF GAMEPLAY IS MOUSE, SHIP MOVES AS MOUSE MOVES
         if event.type == pygame.MOUSEMOTION and MENU == False and SETTINGS == False and sets.gameplay == "Mouse" and STOP == False:
             ship_rect.center = event.pos
