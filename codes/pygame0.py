@@ -86,6 +86,8 @@ white_laser = pygame.image.load("graphics/white_laser.png").convert_alpha()
 yellow_laser = pygame.image.load("graphics/yellow_laser.png").convert_alpha()
 purple_laser = pygame.image.load("graphics/purple_laser.png").convert_alpha()
 multi_laser = pygame.image.load("graphics/multi_laser.png").convert_alpha()
+chest = pygame.image.load("graphics/chest.png").convert_alpha()
+chest_scale = pygame.transform.scale(chest, (40*x, 40*y))
 
 
 #TEXT
@@ -109,6 +111,7 @@ laser_rect = LASER.get_rect(midbottom = (ship_rect.centerx, ship_rect.top))
 meteor_rect = METEOR.get_rect(center = (screen_width/2, screen_height/2))
 huge_meteor = pygame.transform.scale(huge_meteor, (math.floor(huge_meteor.get_width()*x), math.floor(huge_meteor.get_height()*y)))
 huge_meteor_rect = huge_meteor.get_rect(center = (screen_width/2, screen_height/2))
+chest_rect = chest.get_rect(center = (screen_width/2, screen_height/2))
 
 
 #OTHER
@@ -145,6 +148,20 @@ last_points = 0
 highscore = 0
 last_point_check = 0
 current_stage = "better good"
+chest_picked_up = 0
+last_chest_spawn = 0
+blt_speed_activation_time = 0
+blt_speed2_activation_time = 0
+blt_dmg_activation_time = 0
+blt_dmg2_activation_time = 0
+immortality_time = 0
+add_blt_sp = False
+add_blt_sp2 = False
+add_blt_dmg01 = False
+add_blt_dmg02 = False
+immortality = False
+imm = False
+xx = "nothing"
 
 class Ship:
     def __init__(self, x, y, img, dmg, angle):
@@ -322,20 +339,24 @@ class Laser:
 basic_lsr = (ship_rect.midtop, ship_rect.top+5, -1, 10, LASER)
 lasers = []
 
-def modif_blt_speed(speed):
+def add_blt_speed(speed):
     for meteor in meteors:
-        meteor.speed = speed
-def modif_blt_dmg(dmg):
+        meteor.speed += speed
+def add_blt_dmg(dmg):
     for laser in lasers:
-        laser.dmg = dmg
-def modif_blt_reload(reload):
-    reload_time = reload
+        laser.dmg += dmg
+        
+def add_blt_reload(reload):
+    global reload_time
+    reload_time += reload
 def dur_check():
     for laser in lasers:
         if laser.dmg == 2:
             laser.img = yellow_laser
+            print(laser.dmg)
         elif laser.dmg == 3:
             laser.img = white_laser
+            print(laser.dmg)
         elif laser.dmg == 4:
             laser.img = light_blue_laser
         elif laser.dmg == 5:
@@ -431,6 +452,8 @@ def shoot():
         lasers.append(Laser(ship_rect.centerx-10, ship_rect.top-100, +1, 10, LASER, 1, -90))
         lasers.append(Laser(ship_rect.centerx+10, ship_rect.top-100, -1, 10, LASER, 1, -90))
         lasers.append(Laser(ship_rect.centerx, ship_rect.top-120, -1, 10, LASER, 1))
+        lasers.append(Laser(ship_rect.centerx-120, ship_rect.top, +3, 10, LASER, 1, -100))
+        lasers.append(Laser(ship_rect.centerx+120, ship_rect.top, -3, 10, LASER, 1, -80))
 
 
 upgrade_stages = {
@@ -447,7 +470,23 @@ upgrade_stages = {
     "perfect": 10,
 
 }
-# current_stage = sorted(upgrade_stages.keys())[-1]
+
+class Chest:
+    def __init__(self, x, y, img=chest_scale):
+        self.x = x
+        self.y = y
+        self.img = img
+        
+    def update(self):
+        self.y += 1
+
+    def create_chest(x, y, img=chest_scale):
+        chest0 = Chest(x, y, img)
+        chests.append(chest0)
+
+
+chests = []
+chest_effects = ["blt_speed", "blt_speed2", "blt_dmg", "blt_dmg2", "immortality"]
 point_memory = []
 
 #sizes
@@ -482,6 +521,8 @@ while True:
             point_memory.append(points)
             points = add_points + alive_points
         start_has_run = False
+    if len(point_memory) > 100:
+        point_memory.pop(0)
         
     
     # print(start, points, last_points)
@@ -892,7 +933,7 @@ while True:
         meteor_types_rate["alien"] = 2
         meteor_types_rate["bloody"] = 1
         meteor_types_rate["the_rock"] = 1
-    print(meteor_types_rate["alien"])
+    #print(meteor_types_rate["alien"])
 
     ### COLLISIONS
     #LASER AND METEOR
@@ -937,9 +978,10 @@ while True:
     #SHIP AND METEOR
     for meteor in meteors:
         meteor_rect = pygame.Rect(meteor.x, meteor.y, meteor.img.get_width(), meteor.img.get_height())
-        if meteor_rect.colliderect(ship_rect):
+        if meteor_rect.colliderect(ship_rect) and imm == False:
             STOP = True
         meteor.angle = meteor.angle + 1
+    
 
     # GAME OVER
     if STOP == True:
@@ -957,6 +999,78 @@ while True:
     # METEORS RESET
     if MENU == True:
         meteors = []
+        lasers = []
+
+    if MENU == False and SETTINGS == False and STOP == False:
+        if math.floor(points/1000) > last_chest_spawn:
+            Chest.create_chest(random.randint(0, screen_width - 40), -30, chest_scale)         
+            last_chest_spawn = math.floor(points/1000)
+
+        for chest in chests:
+            chest_rect = pygame.Rect(chest.x, chest.y, 40, 40)
+            chest.y += 1
+            if chest_rect.colliderect(ship_rect):
+                chest_picked_up = True
+                chests.remove(chest)
+                
+                xx = random.choice(chest_effects)
+                if xx == "blt_speed":
+                    add_blt_speed(10)
+                    add_blt_reload(-0.15)
+                    add_blt_sp = True
+                    blt_speed_activation_time = time.time()
+                    print("blt_speed")
+                if xx == "blt_speed2":
+                    add_blt_speed(10)
+                    add_blt_reload(-0.15)
+                    add_blt_sp2 = True
+                    blt_speed2_activation_time = time.time()
+                    print("blt_speed2")
+                if xx == "dmg":
+                    add_blt_dmg(1)
+                    add_blt_dmg01 = True
+                if xx == "dmg2":
+                    add_blt_dmg(2)
+                    add_blt_dmg02 = True
+                    blt_dmg2_activation_time = time.time()
+                    print("dmg2")
+                if xx == "immortality":
+                    immortality = True
+                    immortality_time = time.time()
+                    imm = True
+                    print("immortality")
+            if chest.y > screen_height:
+                chests.remove(chest)
+                chest_picked_up = False
+            
+            screen.blit(chest.img, (chest.x, chest.y))     
+            #print(chests)
+        #print(f"{xx}")
+        for laser in lasers:
+            print(laser.dmg)
+        if blt_speed_activation_time + 20 < time.time() and add_blt_sp == True:
+            add_blt_speed(-10)
+            add_blt_reload(0.15)
+            add_blt_sp = False
+        if blt_speed2_activation_time + 40 < time.time() and add_blt_sp2 == True:
+            add_blt_speed(-10)
+            add_blt_reload(0.15)
+            add_blt_sp2 = False
+        if blt_dmg2_activation_time + 20 < time.time() and add_blt_dmg02 == True:
+            add_blt_dmg(-2)
+            add_blt_dmg02 = False
+        if immortality_time + 7 < time.time() and imm == True:
+            pygame.draw.rect(screen, "red", ship_rect)
+            if immortality_time + 10 < time.time():
+                immortality = False
+                imm = False
+        if chest_picked_up == False:
+            if points/1000+200 > last_chest_spawn:
+                chests.append(Chest(random.randint(0, screen_width - 40), random.randint(0, screen_height - 40), chest_scale))
+                last_chest_spawn = points/1000
+                chest_picked_up = None
+        #print(immortality)
+               
 
     # POINTS
     points0 = font1.render(f"Points: {points}", True, "grey40")
@@ -966,7 +1080,8 @@ while True:
         screen.blit(points0, (13,5))
         screen.blit(last_points0, (13, points0.get_height()+5))
         screen.blit(highscore0, (screen_width-highscore0.get_width()-SETTINGS_butt_scale.get_width()-50, 0))
-
+    
+        
     
 #x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#
         
