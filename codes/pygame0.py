@@ -502,7 +502,8 @@ while True:
     points = add_points + alive_points
     if MENU == False and SETTINGS == False and STOP == False and start_has_run == False:
         start_time = time.time() # reset start_time when game restarts
-        last_points = points
+        try:last_points = point_memory[-1]
+        except: pass                 
         start = 0
         alive_points = 0
         add_points = 0
@@ -1023,12 +1024,14 @@ while True:
                     add_blt_speed(10)
                     add_blt_reload(-0.15)
                     add_blt_sp = True
+                    imm = True
                     blt_speed_activation_time = time.time()
                     print("blt_speed")
                 if xx == "blt_speed2":
                     add_blt_speed(10)
                     add_blt_reload(-0.15)
                     add_blt_sp2 = True
+                    imm = True
                     blt_speed2_activation_time = time.time()
                     print("blt_speed2")
                 if xx == "blt_dmg":
@@ -1056,7 +1059,16 @@ while True:
         
         #print(chest.x, chest.y)
         #print(f"{xx}")
-        
+        if blt_speed_activation_time + 3 < time.time() and add_blt_sp == True:
+            imm = False
+
+        if blt_speed2_activation_time + 3 < time.time() and add_blt_sp2 == True:
+            imm = False
+
+        if immortality == True:
+            imm = True
+
+
         if blt_speed_activation_time + 10 < time.time() and add_blt_sp == True:
             add_blt_speed(-10)
             add_blt_reload(0.15)
@@ -1094,7 +1106,7 @@ while True:
             #screen.blit(deactivated_effect, (round(screen_width/2-current_effect.get_width()/2), 50))
             add_blt_dmg02 = False
             blit_deact = True
-        if blt_dmg2_activation_time + 19 < time.time():
+        if blit_deact == False:
             current_effect = None
             deactivated_effect = None
     if add_blt_sp == True:
@@ -1103,10 +1115,10 @@ while True:
             screen.blit(current_effect, (round(screen_width/2-current_effect.get_width()/2), 50))
         if blt_speed_activation_time + 10 < time.time() < blt_speed_activation_time + 13:
             deactivated_effect = font1.render("(+5 laser speed): Effect ended", True, "grey40")
-            screen.blit(deactivated_effect, (round(screen_width/2-current_effect.get_width()/2), 50))
+            # screen.blit(deactivated_effect, (round(screen_width/2-current_effect.get_width()/2), 50))
             add_blt_sp = False
             blit_deact = True
-        if blt_speed_activation_time + 14 < time.time():
+        if blit_deact == False:
             current_effect = None
             deactivated_effect = None
     if add_blt_sp2 == True:
@@ -1116,10 +1128,10 @@ while True:
         if blt_speed2_activation_time + 25 < time.time() < blt_speed2_activation_time + 28:
             deactivated_effect = font1.render("(+5 laser speed<2>): Effect ended", True, "grey50")
             blit_deact_time = time.time()
-            screen.blit(deactivated_effect, (round(screen_width/2-current_effect.get_width()/2), 50))
+            # screen.blit(deactivated_effect, (round(screen_width/2-current_effect.get_width()/2), 50))
             add_blt_sp2 = False
             blit_deact = True
-        if blt_speed2_activation_time + 29 < time.time():
+        if blit_deact == False:
             current_effect = None
             deactivated_effect = None
     if imm == True:
@@ -1129,10 +1141,10 @@ while True:
         if immortality_time + 10 < time.time() < immortality_time + 13:
             deactivated_effect = font1.render("(Immortality):Effect ended", True, "grey50")
             blit_deact_time = time.time()
-            screen.blit(deactivated_effect, (round(screen_width/2-current_effect.get_width()/2), 50))
+            # screen.blit(deactivated_effect, (round(screen_width/2-current_effect.get_width()/2), 50))
             imm = False
             blit_deact = True
-        if immortality_time + 14 < time.time():
+        if blit_deact == False:
             current_effect = None
             deactivated_effect = None
     
