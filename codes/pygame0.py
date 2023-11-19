@@ -1082,7 +1082,7 @@ while True:
         modif_blt_dmg(the_blt_dmg)
         if show_blt_01 + 3 > time.time():
             current_effect = font1.render("+1 laser damage (permanent)", True, "grey50")
-            screen.blit(current_effect, (screen_width/2-current_effect.get_width()/2, screen_height/2-current_effect.get_height()/2))
+            screen.blit(current_effect, (round(screen_width/2-current_effect.get_width()/2), 50))
 
     if add_blt_dmg02 == True:
         modif_blt_dmg(the_blt_dmg+2)
