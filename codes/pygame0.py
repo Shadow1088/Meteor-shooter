@@ -88,6 +88,7 @@ purple_laser = pygame.image.load("graphics/purple_laser.png").convert_alpha()
 multi_laser = pygame.image.load("graphics/multi_laser.png").convert_alpha()
 chest = pygame.image.load("graphics/chest.png").convert_alpha()
 chest_scale = pygame.transform.scale(chest, (40*x, 40*y))
+alien_meteor_scale = pygame.transform.scale(alien_meteor, (50*x, 50*y))
 
 
 #TEXT
@@ -100,6 +101,7 @@ window_size_text0 = font1.render(f"Window size:  <-   {sets.window_size}   -> ",
 YOU_LOST = font0.render("!!! YOU LOST !!!  (r) to enter Menu", True, "red")
 YOU_LOST2 = font0.render("!!! YOU LOST !!!  (r) to enter Menu", True, "red3")
 difficulty0 = font1.render(f"Difficulty: {sets.difficulty} -> +5", True, "grey40")
+
 
 
 #OBJECT SETTINGS
@@ -147,7 +149,8 @@ add_points = 0
 last_points = 0
 highscore = 0
 last_point_check = 0
-current_stage = "better good"
+current_stage = "stock"
+stage_selected_index = 0
 chest_picked_up = 0
 last_chest_spawn = 0
 blt_speed_activation_time = 0
@@ -162,6 +165,9 @@ add_blt_dmg02 = False
 immortality = False
 imm = False
 xx = "nothing"
+the_blt_dmg = 1
+blit_deact = True
+blit_deact_time = 0
 
 class Ship:
     def __init__(self, x, y, img, dmg, angle):
@@ -271,7 +277,7 @@ class OverpoweredMeteor(Meteor):
 class AlienMeteor(Meteor):
     def __init__(self, x, y, speed, img, hp, angle=None):
         super().__init__(x, y, speed, alien_meteor, hp, angle=None)
-        self.img = alien_meteor
+        self.img = alien_meteor_scale
         self.hp = 10000
         self.angle = random.randint(0, 360) if angle is None else angle
         self.mask = pygame.mask.from_surface(self.img)
@@ -345,7 +351,10 @@ def add_blt_speed(speed):
 def add_blt_dmg(dmg):
     for laser in lasers:
         laser.dmg += dmg
-        
+def modif_blt_dmg(dmg):
+    for laser in lasers:
+        laser.dmg = dmg
+
 def add_blt_reload(reload):
     global reload_time
     reload_time += reload
@@ -353,10 +362,8 @@ def dur_check():
     for laser in lasers:
         if laser.dmg == 2:
             laser.img = yellow_laser
-            print(laser.dmg)
         elif laser.dmg == 3:
             laser.img = white_laser
-            print(laser.dmg)
         elif laser.dmg == 4:
             laser.img = light_blue_laser
         elif laser.dmg == 5:
@@ -456,20 +463,7 @@ def shoot():
         lasers.append(Laser(ship_rect.centerx+120, ship_rect.top, -3, 10, LASER, 1, -80))
 
 
-upgrade_stages = {
-    "stock": 0,
-    "basic": 1,
-    "middle": 2,
-    "better": 3,
-    "way better": 4,
-    "good": 5,
-    "better good": 6,
-    "better better good": 7,
-    "better better better good": 8,
-    "great": 9,
-    "perfect": 10,
-
-}
+upgrade_stages = ["stock", "basic", "middle", "better", "way better", "good", "better good", "better better good", "better better better good", "great", "perfect"]
 
 class Chest:
     def __init__(self, x, y, img=chest_scale):
@@ -486,7 +480,7 @@ class Chest:
 
 
 chests = []
-chest_effects = ["blt_speed", "blt_speed2", "blt_dmg", "blt_dmg2", "immortality"]
+chest_effects = ["blt_speed", "blt_speed2", "blt_dmg", "blt_dmg2", "immortality", "stageup"]
 point_memory = []
 
 #sizes
@@ -835,13 +829,7 @@ while True:
         if settings_selected_index == 1 and settings_selected_any == True:
             pygame.draw.rect(screen, "grey", difficulty0.get_rect(topleft = (screen_width/3-5*x, screen_height/4*3)), 3)
 
-    # LASERS
-    dur_check()
-    for lsr in lasers:
-        lsr.draw(screen)
-        lsr.lsr_update()
-        if lsr.y < 0:
-            lasers.remove(lsr)
+    
 
     # METEORS
     for meteor in meteors:
@@ -851,46 +839,48 @@ while True:
     sum_value = sum(meteor_types_rate.values())
     
     # SPAWN METEORS
-    if (time.time() - last_meteor_spawn_time)+DIFFICULTY > meteor_spawn_time and SETTINGS == False and MENU == False:
+    try:
+        if (time.time() - last_meteor_spawn_time)+DIFFICULTY > meteor_spawn_time and SETTINGS == False and MENU == False:
+            
+            current_meteor_rate_num = random.choice(range(0, sum_value+1))
+            if current_meteor_rate_num in range(0, meteor_types_rate["basic"]):
+                current_meteor = Meteor; hp = 1; speed = 5
         
-        current_meteor_rate_num = random.choice(range(0, sum_value+1))
-        if current_meteor_rate_num in range(0, meteor_types_rate["basic"]):
-            current_meteor = Meteor; hp = 1; speed = 5
-    
-        elif current_meteor_rate_num in range(meteor_types_rate["basic"], meteor_types_rate["mid"]+meteor_types_rate["basic"]):
-            current_meteor = MidMeteor; hp = 2; speed = 5
+            elif current_meteor_rate_num in range(meteor_types_rate["basic"], meteor_types_rate["mid"]+meteor_types_rate["basic"]):
+                current_meteor = MidMeteor; hp = 2; speed = 5
 
-        elif current_meteor_rate_num in range(meteor_types_rate["mid"], meteor_types_rate["speedy"]+meteor_types_rate["mid"]):
-            current_meteor = SpeedyMeteor; hp = 1; speed = 10
-           
-        elif current_meteor_rate_num in range(meteor_types_rate["speedy"], meteor_types_rate["good"]+meteor_types_rate["speedy"]):
-            current_meteor = GoodMeteor; hp = 3; speed = 5
-          
-        elif current_meteor_rate_num in range(meteor_types_rate["good"], meteor_types_rate["epic"]+meteor_types_rate["good"]):
-            current_meteor = EpicMeteor; hp = 6; speed = 5
-  
-        elif current_meteor_rate_num in range(meteor_types_rate["epic"], meteor_types_rate["huge"]+meteor_types_rate["epic"]):
-            current_meteor = HugeMeteor; hp = 8; speed = 5
+            elif current_meteor_rate_num in range(meteor_types_rate["mid"], meteor_types_rate["speedy"]+meteor_types_rate["mid"]):
+                current_meteor = SpeedyMeteor; hp = 1; speed = 10
             
-        elif current_meteor_rate_num in range(meteor_types_rate["huge"], meteor_types_rate["legendary"]+meteor_types_rate["huge"]):
-            current_meteor = LegendaryMeteor; hp = 10; speed = 5
+            elif current_meteor_rate_num in range(meteor_types_rate["speedy"], meteor_types_rate["good"]+meteor_types_rate["speedy"]):
+                current_meteor = GoodMeteor; hp = 3; speed = 5
             
-        elif current_meteor_rate_num in range(meteor_types_rate["legendary"], meteor_types_rate["overpowered"]+meteor_types_rate["legendary"]):
-            current_meteor = OverpoweredMeteor; hp = 30; speed = 5
+            elif current_meteor_rate_num in range(meteor_types_rate["good"], meteor_types_rate["epic"]+meteor_types_rate["good"]):
+                current_meteor = EpicMeteor; hp = 6; speed = 5
+    
+            elif current_meteor_rate_num in range(meteor_types_rate["epic"], meteor_types_rate["huge"]+meteor_types_rate["epic"]):
+                current_meteor = HugeMeteor; hp = 8; speed = 5
+                
+            elif current_meteor_rate_num in range(meteor_types_rate["huge"], meteor_types_rate["legendary"]+meteor_types_rate["huge"]):
+                current_meteor = LegendaryMeteor; hp = 10; speed = 5
+                
+            elif current_meteor_rate_num in range(meteor_types_rate["legendary"], meteor_types_rate["overpowered"]+meteor_types_rate["legendary"]):
+                current_meteor = OverpoweredMeteor; hp = 30; speed = 5
+                
+            elif current_meteor_rate_num in range(meteor_types_rate["overpowered"], meteor_types_rate["alien"]+meteor_types_rate["overpowered"]):
+                current_meteor = AlienMeteor; hp = 10000; speed = 5
             
-        elif current_meteor_rate_num in range(meteor_types_rate["overpowered"], meteor_types_rate["alien"]+meteor_types_rate["overpowered"]):
-            current_meteor = AlienMeteor; hp = 10000; speed = 5
-         
-        elif current_meteor_rate_num in range(meteor_types_rate["alien"], meteor_types_rate["bloody"]+meteor_types_rate["alien"]):
-            current_meteor = bloodyMeteor; hp = 25; speed = 5
-          
-        elif current_meteor_rate_num in range(meteor_types_rate["bloody"], meteor_types_rate["the_rock"]+1+meteor_types_rate["bloody"]):
-            current_meteor = the_rockMeteor; hp = 15; speed = 5
-          
-        
-        meteors.append(current_meteor(random.randint(0, screen_width - meteor_rect.width), y-meteor_rect.height-300, #spawns above screen
-                                       speed, rotation_meteor, hp))
-        last_meteor_spawn_time = time.time()
+            elif current_meteor_rate_num in range(meteor_types_rate["alien"], meteor_types_rate["bloody"]+meteor_types_rate["alien"]):
+                current_meteor = bloodyMeteor; hp = 25; speed = 5
+            
+            elif current_meteor_rate_num in range(meteor_types_rate["bloody"], meteor_types_rate["the_rock"]+1+meteor_types_rate["bloody"]):
+                current_meteor = the_rockMeteor; hp = 15; speed = 5
+            
+            
+            meteors.append(current_meteor(random.randint(0, screen_width - meteor_rect.width), y-meteor_rect.height-300, #spawns above screen
+                                        speed, rotation_meteor, hp))
+            last_meteor_spawn_time = time.time()
+    except: pass              
 
     # UPDATE AND DRAW METEORS
     for meteor in meteors:
@@ -903,7 +893,7 @@ while True:
             last_point_check = math.floor(points/100)
             meteor_types_rate["basic"] = meteor_types_rate["basic"] - 100
             meteor_types_rate["mid"] = meteor_types_rate["mid"] - 50
-            meteor_types_rate["speedy"] = meteor_types_rate["speedy"]
+            meteor_types_rate["speedy"] = meteor_types_rate["speedy"] + 10
             meteor_types_rate["good"] = meteor_types_rate["good"] + 20
             meteor_types_rate["epic"] = meteor_types_rate["epic"] + 30
             meteor_types_rate["huge"] = meteor_types_rate["huge"] +40
@@ -916,6 +906,20 @@ while True:
             meteor_types_rate["basic"] = 120
         if meteor_types_rate["mid"] < 80:
             meteor_types_rate["mid"] = 150
+        if meteor_types_rate["huge"] > 900:
+            meteor_types_rate["huge"] = 700
+        if meteor_types_rate["legendary"] > 1000:
+            meteor_types_rate["legendary"] = 800
+        if meteor_types_rate["overpowered"] > 1400:
+            meteor_types_rate["overpowered"] = 1000
+        if meteor_types_rate["alien"] > 1500:
+            meteor_types_rate["alien"] = 900
+        if meteor_types_rate["bloody"] > 1600:
+            meteor_types_rate["bloody"] = 1000
+        if meteor_types_rate["the_rock"] > 1700:
+            meteor_types_rate["the_rock"] = 1100
+        if meteor_types_rate["speedy"] > 2200:
+            meteor_types_rate["speedy"] = 1000
             
 
     # AFTER GAME OVER METEOR TYPE RATES RESET
@@ -934,7 +938,7 @@ while True:
         meteor_types_rate["bloody"] = 1
         meteor_types_rate["the_rock"] = 1
     #print(meteor_types_rate["alien"])
-
+    
     ### COLLISIONS
     #LASER AND METEOR
     for meteor in meteors:
@@ -942,8 +946,8 @@ while True:
         for lsr in lasers:
             lsr_rect = pygame.Rect(lsr.x, lsr.y, lsr.img.get_width(), lsr.img.get_height())
             if meteor_rect.colliderect(lsr_rect): 
-                if meteor.hp == 1:
-                    meteor.hp = meteor.hp - basic_ship.dmg
+                if meteor.hp >= 1:
+                    meteor.hp = meteor.hp - lsr.dmg
                 if meteor.hp <= 0:
                     try: meteors.remove(meteor)
                     except: pass
@@ -1026,11 +1030,12 @@ while True:
                     add_blt_sp2 = True
                     blt_speed2_activation_time = time.time()
                     print("blt_speed2")
-                if xx == "dmg":
-                    add_blt_dmg(1)
+                if xx == "blt_dmg":
+                    the_blt_dmg = the_blt_dmg + 1
                     add_blt_dmg01 = True
-                if xx == "dmg2":
-                    add_blt_dmg(2)
+                    show_blt_01 = time.time()
+                if xx == "blt_dmg2":
+                    # add_blt_dmg(2)
                     add_blt_dmg02 = True
                     blt_dmg2_activation_time = time.time()
                     print("dmg2")
@@ -1039,38 +1044,131 @@ while True:
                     immortality_time = time.time()
                     imm = True
                     print("immortality")
+                if xx == "stageup":
+                    current_stage = upgrade_stages[stage_selected_index+1]
+            
             if chest.y > screen_height:
                 chests.remove(chest)
                 chest_picked_up = False
             
             screen.blit(chest.img, (chest.x, chest.y))     
-            #print(chests)
+        
+        #print(chest.x, chest.y)
         #print(f"{xx}")
-        for laser in lasers:
-            print(laser.dmg)
-        if blt_speed_activation_time + 20 < time.time() and add_blt_sp == True:
+        
+        if blt_speed_activation_time + 10 < time.time() and add_blt_sp == True:
             add_blt_speed(-10)
             add_blt_reload(0.15)
-            add_blt_sp = False
-        if blt_speed2_activation_time + 40 < time.time() and add_blt_sp2 == True:
+            
+        if blt_speed2_activation_time + 25 < time.time() and add_blt_sp2 == True:
             add_blt_speed(-10)
             add_blt_reload(0.15)
-            add_blt_sp2 = False
-        if blt_dmg2_activation_time + 20 < time.time() and add_blt_dmg02 == True:
-            add_blt_dmg(-2)
-            add_blt_dmg02 = False
+            
+        if blt_dmg2_activation_time + 15 < time.time() and add_blt_dmg02 == True:
+            modif_blt_dmg(the_blt_dmg-2)
+
         if immortality_time + 7 < time.time() and imm == True:
-            pygame.draw.rect(screen, "red", ship_rect)
-            if immortality_time + 10 < time.time():
-                immortality = False
-                imm = False
+            pygame.draw.rect(screen, "red", ship_rect, 3)
+            
+
         if chest_picked_up == False:
             if points/1000+200 > last_chest_spawn:
                 chests.append(Chest(random.randint(0, screen_width - 40), random.randint(0, screen_height - 40), chest_scale))
                 last_chest_spawn = points/1000
                 chest_picked_up = None
-        #print(immortality)
-               
+        
+    if add_blt_dmg01 == True:
+        modif_blt_dmg(the_blt_dmg)
+        if show_blt_01 + 3 > time.time():
+            current_effect = font1.render("+1 laser damage (permanent)", True, "grey50")
+            screen.blit(current_effect, (screen_width/2-current_effect.get_width()/2, screen_height/2-current_effect.get_height()/2))
+
+    if add_blt_dmg02 == True:
+        modif_blt_dmg(the_blt_dmg+2)
+        if blt_dmg2_activation_time + 3 > time.time():
+            current_effect = font1.render("+2 laser damage (15 seconds)", True, "grey50")
+            screen.blit(current_effect, (round(screen_width/2-current_effect.get_width()/2), 50))
+        if blt_dmg2_activation_time + 15 < time.time() < blt_dmg2_activation_time + 18:
+            deactivated_effect = font1.render("(+2 laser dmg): Effect ended", True, "grey40")
+            #screen.blit(deactivated_effect, (round(screen_width/2-current_effect.get_width()/2), 50))
+            add_blt_dmg02 = False
+            blit_deact = True
+        if blt_dmg2_activation_time + 19 < time.time():
+            current_effect = None
+            deactivated_effect = None
+    if add_blt_sp == True:
+        if blt_speed_activation_time + 3 > time.time():
+            current_effect = font1.render("+5 laser speed (10 seconds)", True, "grey50")
+            screen.blit(current_effect, (round(screen_width/2-current_effect.get_width()/2), 50))
+        if blt_speed_activation_time + 10 < time.time() < blt_speed_activation_time + 13:
+            deactivated_effect = font1.render("(+5 laser speed): Effect ended", True, "grey40")
+            screen.blit(deactivated_effect, (round(screen_width/2-current_effect.get_width()/2), 50))
+            add_blt_sp = False
+            blit_deact = True
+        if blt_speed_activation_time + 14 < time.time():
+            current_effect = None
+            deactivated_effect = None
+    if add_blt_sp2 == True:
+        if blt_speed2_activation_time + 3 > time.time():
+            current_effect = font1.render("+5 laser speed<2> (25 seconds)", True, "grey50")
+            screen.blit(current_effect, (round(screen_width/2-current_effect.get_width()/2), 50))
+        if blt_speed2_activation_time + 25 < time.time() < blt_speed2_activation_time + 28:
+            deactivated_effect = font1.render("(+5 laser speed<2>): Effect ended", True, "grey50")
+            blit_deact_time = time.time()
+            screen.blit(deactivated_effect, (round(screen_width/2-current_effect.get_width()/2), 50))
+            add_blt_sp2 = False
+            blit_deact = True
+        if blt_speed2_activation_time + 29 < time.time():
+            current_effect = None
+            deactivated_effect = None
+    if imm == True:
+        if immortality_time + 3 > time.time():
+            current_effect = font1.render("Immortality (10 seconds)", True, "grey50")
+            screen.blit(current_effect, (round(screen_width/2-current_effect.get_width()/2), 50))
+        if immortality_time + 10 < time.time() < immortality_time + 13:
+            deactivated_effect = font1.render("(Immortality):Effect ended", True, "grey50")
+            blit_deact_time = time.time()
+            screen.blit(deactivated_effect, (round(screen_width/2-current_effect.get_width()/2), 50))
+            imm = False
+            blit_deact = True
+        if immortality_time + 14 < time.time():
+            current_effect = None
+            deactivated_effect = None
+    
+
+    # EFFECT AND CHEST RESET
+    if STOP == True or MENU == True or SETTINGS == True:
+        reload_time = 0.2
+        stage_selected_index = 0
+        current_stage = upgrade_stages[stage_selected_index]
+        current_effect = None
+        deactivated_effect = None
+        add_blt_dmg01 = False
+        add_blt_dmg02 = False
+        add_blt_sp = False
+        add_blt_sp2 = False
+        immortality = False
+        imm = False
+        blt_speed_activation_time = 0
+        blt_speed2_activation_time = 0
+        blt_dmg2_activation_time = 0
+        immortality_time = 0
+        last_chest_spawn = 0
+
+    if STOP != True and blit_deact == True:
+        try: screen.blit(deactivated_effect, (round(screen_width/2-deactivated_effect.get_width()/2), 50))
+        except: pass
+        
+        if blit_deact_time + 3 < time.time():
+            blit_deact = False
+
+    # LASERS
+    dur_check()
+    for lsr in lasers:
+        lsr.draw(screen)
+        lsr.lsr_update()
+        if lsr.y < 0:
+            lasers.remove(lsr)
 
     # POINTS
     points0 = font1.render(f"Points: {points}", True, "grey40")
@@ -1081,9 +1179,6 @@ while True:
         screen.blit(last_points0, (13, points0.get_height()+5))
         screen.blit(highscore0, (screen_width-highscore0.get_width()-SETTINGS_butt_scale.get_width()-50, 0))
     
-        
-    
-#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#
-        
+#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#
 
     pygame.display.update()
