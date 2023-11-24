@@ -1,0 +1,2 @@
+highscore=535744
+last_points=5683

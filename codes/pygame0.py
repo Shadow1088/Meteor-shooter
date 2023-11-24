@@ -147,7 +147,8 @@ points = 0
 alive_points = 0
 add_points = 0
 last_points = 0
-highscore = 0
+test0 = 0
+highscore = test0
 last_point_check = 0
 current_stage = "stock"
 stage_selected_index = 0
@@ -167,7 +168,10 @@ imm = False
 xx = "nothing"
 the_blt_dmg = 1
 blit_deact = True
+blit_deact = True
 blit_deact_time = 0
+the_last_points = 0
+
 
 class Ship:
     def __init__(self, x, y, img, dmg, angle):
@@ -483,12 +487,49 @@ chests = []
 chest_effects = ["blt_speed", "blt_speed2", "blt_dmg", "blt_dmg2", "immortality", "stageup"]
 point_memory = []
 
+
+def save():
+    save_file_name = "codes/save_file.txt"
+    new_content = []
+    
+    try:
+        with open(save_file_name, "r") as save_file:
+            lines = save_file.readlines()
+
+            for line in lines:
+                global highscore
+                if "highscore" in line:
+                    if highscore > int(line.split("=")[1]):
+                        modified_line = f"highscore={highscore}\n"
+                        new_content.append(modified_line)
+                        
+                    else:
+                        if highscore < int(line.split("=")[1]):
+                            highscore = int(line.split("=")[1])
+                            global test0
+                            test0 = int(line.split("=")[1])   
+                        new_content.append(line)
+                elif "last_points" in line:
+                    modified_line = f"last_points={last_points}\n"
+                    new_content.append(modified_line)
+                    global the_last_points
+                    the_last_points = int(line.split("=")[1])
+                else:
+                    new_content.append(line)
+    except FileNotFoundError:
+        pass
+    
+    with open(save_file_name, "w") as save_file:
+        save_file.writelines(new_content)
+
+
+
 #sizes
 #############################################################################################################################
 #############################################################################################################################
 #############################################################################################################################
 
-
+point_memory.append(test0)
 while True:
     if MENU == False and SETTINGS == False and STOP == False:
         if sets.gameplay == "Mouse/Space" or sets.gameplay == "Mouse":
@@ -497,9 +538,18 @@ while True:
     
 
     # POINT MECHANISM
-    try: highscore = max(point_memory)
-    except: pass
+    
     points = add_points + alive_points
+    
+    if highscore < test0:
+        highscore = test0
+    if max(point_memory) > highscore:
+        try: highscore = max(point_memory)
+        except: pass
+    if last_points == 0:
+        last_points = the_last_points
+    
+    
     if MENU == False and SETTINGS == False and STOP == False and start_has_run == False:
         start_time = time.time() # reset start_time when game restarts
         try:last_points = point_memory[-1]
@@ -922,7 +972,10 @@ while True:
             meteor_types_rate["the_rock"] = 1100
         if meteor_types_rate["speedy"] > 2200:
             meteor_types_rate["speedy"] = 1000
-            
+        
+        p = random.randint(0, 1000)
+        if p == 0:
+            print(f" meteor_types_rate: {meteor_types_rate}")
 
     # AFTER GAME OVER METEOR TYPE RATES RESET
     if STOP == True:
@@ -1053,7 +1106,8 @@ while True:
                     print("immortality")
                     xx = "nothing"
                 if xx == "stageup":
-                    current_stage = upgrade_stages[stage_selected_index+1]
+                    try:current_stage = upgrade_stages[stage_selected_index+1]
+                    except: pass
                     stage_selected_index = stage_selected_index + 1
                     xx = "nothing"
 
@@ -1071,10 +1125,8 @@ while True:
         if blt_speed2_activation_time + 3 < time.time() and add_blt_sp2 == True:
             imm = False
 
-        
         if immortality == True and xx != "nothing":
             imm = True
-
 
         if blt_speed_activation_time + 10 < time.time() and add_blt_sp == True:
             add_blt_speed(-10)
@@ -1199,7 +1251,10 @@ while True:
         screen.blit(points0, (13,5))
         screen.blit(last_points0, (13, points0.get_height()+5))
         screen.blit(highscore0, (screen_width-highscore0.get_width()-SETTINGS_butt_scale.get_width()-50, 0))
+
+    
     
 #x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#x#
 
     pygame.display.update()
+    save()
