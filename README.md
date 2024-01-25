@@ -1,5 +1,7 @@
 (s) for START if in MENU
+
 (e) for EXIT if in MENU
+
 (esc) for SETTINGS (! will lose points, upgrades, ..)
 
 while in SETTINGS
