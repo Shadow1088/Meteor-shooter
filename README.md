@@ -17,6 +17,8 @@ while in SETTINGS
 # Warning
 Window_setting is not usable / not compatible with this version of the game. (Not gonna be finished)
 
+To make this work you need python library "pygame", if you want to make it .exe, do it yourself. Antiviruses think this is a malware.
+
 
 # Credits
 Share and use this game as you like. (I did code it all by myself, but the idea and 1/3 graphics are inspired by Christian Koch on Udemy)
