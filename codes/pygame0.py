@@ -536,7 +536,7 @@ while True:
             pygame.mouse.set_visible(False) 
     else: pygame.mouse.set_visible(True)       
     
-
+    
     # POINT MECHANISM
     
     points = add_points + alive_points
@@ -665,13 +665,13 @@ while True:
             MENU = True
             SETTINGS = False
             STOP = False
-            print("r")
+            #print("r")
         if event.type == pygame.KEYDOWN and event.key == pygame.K_s and MENU == True:
             MENU = False
             SETTINGS = False
-            print("s")
+            #print("s")
         if event.type == pygame.KEYDOWN and event.key == pygame.K_e and MENU == True:
-            print("e")
+            #print("e")
             pygame.quit()
             sys.exit()
         
@@ -972,10 +972,11 @@ while True:
             meteor_types_rate["the_rock"] = 1100
         if meteor_types_rate["speedy"] > 2200:
             meteor_types_rate["speedy"] = 1000
-        
-        p = random.randint(0, 1000)
-        if p == 0:
-            print(f" meteor_types_rate: {meteor_types_rate}")
+
+        #debugging 
+        # p = random.randint(0, 1000)
+        # if p == 0:
+        #     print(f" meteor_types_rate: {meteor_types_rate}")
 
     # AFTER GAME OVER METEOR TYPE RATES RESET
     if STOP == True:
@@ -1079,7 +1080,7 @@ while True:
                     add_blt_sp = True
                     imm = True
                     blt_speed_activation_time = time.time()
-                    print("blt_speed")
+                    #print("blt_speed")
                     xx = "nothing"
                 if xx == "blt_speed2":
                     add_blt_speed(10)
@@ -1087,7 +1088,7 @@ while True:
                     add_blt_sp2 = True
                     imm = True
                     blt_speed2_activation_time = time.time()
-                    print("blt_speed2")
+                    #print("blt_speed2")
                 if xx == "blt_dmg":
                     the_blt_dmg = the_blt_dmg + 1
                     add_blt_dmg01 = True
@@ -1097,13 +1098,13 @@ while True:
                     # add_blt_dmg(2)
                     add_blt_dmg02 = True
                     blt_dmg2_activation_time = time.time()
-                    print("dmg2")
+                    #print("dmg2")
                     xx = "nothing"
                 if xx == "immortality":
                     immortality = True
                     immortality_time = time.time()
                     imm = True
-                    print("immortality")
+                    #print("immortality")
                     xx = "nothing"
                 if xx == "stageup":
                     try:current_stage = upgrade_stages[stage_selected_index+1]

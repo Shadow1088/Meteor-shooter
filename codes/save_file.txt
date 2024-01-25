@@ -1,2 +1,2 @@
-highscore=535744
-last_points=5683
+highscore=0
+last_points=0
